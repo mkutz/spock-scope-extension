@@ -30,3 +30,9 @@ currentScopes = ["feature a", "feature c"]
 ```
 
 Note that if `currentScopes` is empty or not configured at all the extension will not ignore any test.
+
+Not yet implemented/Ideas
+-------------------------
+
+- `currentScopes`should be a `-D`parameter that can be usens in `mvn test -Dspock.currentScopes=a,b`
+- scopes may be better defined as an Enum, so it is refactorable and autocompletable in IDE's.
