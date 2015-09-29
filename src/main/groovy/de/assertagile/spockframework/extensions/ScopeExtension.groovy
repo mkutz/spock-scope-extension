@@ -54,7 +54,7 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
         if (!getCurrentScopes()) return true
         List<String> specOrFeatureScopes = annotation.value() ?: []
         if (!getScopes().containsAll(specOrFeatureScopes)) {
-            throw new Exception("Specified scopes ${specOrFeatureScopes - getScopes()} are not configured!")
+            throw new IllegalArgumentException("Specified scopes ${specOrFeatureScopes - getScopes()} are not configured! All used scopes must be added to the SpockScopeConfig.groovy file.")
         }
         return !getCurrentScopes().disjoint(specOrFeatureScopes)
     }

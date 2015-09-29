@@ -84,13 +84,14 @@ class ScopeExtensionSpec extends Specification {
 
         SpecInfo specInfoMock = Mock()
         Scope scope = Mock() {
-            value() >> ["z"]
+            value() >> ["x", "z"]
         }
 
         when:
         scopeExtension.visitSpecAnnotation(scope, specInfoMock)
 
         then:
-        thrown(Exception)
+        IllegalArgumentException e = thrown()
+        e.message == "Specified scopes [x, z] are not configured! All used scopes must be added to the SpockScopeConfig.groovy file."
     }
 }
