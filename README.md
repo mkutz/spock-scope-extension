@@ -26,7 +26,7 @@ For instance in your pom.xml:
 Add `SpockScopeConfig.groovy` to your projects resources and add at least a list of possible `scopes` and optinally a list of `currentScopes`:
 ```groovy
 scopes = ["feature a", "feature b", "feature c"]
-currentScopes = ["feature a", "feature c]
+currentScopes = ["feature a", "feature c"]
 ```
 
 Note that if `currentScopes` is empty or not configured at all the extension will not ignore any test.
