@@ -23,16 +23,20 @@ For instance in your pom.xml:
 </dependency>
 ```
 
-Add `SpockScopeConfig.groovy` to your projects resources and add at least a list of possible `scopes` and optinally a list of `currentScopes`:
+Now you can mark your `Specification`s with the `@Scope(…)` annotation with one or more strings representing scopes.
+
+When you execute your tests you can pass `-Dspock.scopes=…` to your test execution, all tests that are not annotated with at least one of the given scopes, it will be ignored.
+
+To ease usage in IDE's you can as well create a `SpockScopeConfig.groovy` to your projects resources and add a list of `currentScopes` instead of the `-Dspock.scopes=…` parameter:
 ```groovy
-scopes = ["feature a", "feature b", "feature c"]
 currentScopes = ["feature a", "feature c"]
 ```
 
 Note that if `currentScopes` is empty or not configured at all the extension will not ignore any test.
 
+Also note that the `-Dspock.scopes=…` parameter will always replace the configuration in `SpockScopeConfig.groovy` if given.
+
 Not yet implemented/Ideas
 -------------------------
 
-- `currentScopes`should be a `-D`parameter that can be usens in `mvn test -Dspock.currentScopes=a,b`
 - scopes may be better defined as an Enum, so it is refactorable and autocompletable in IDE's.

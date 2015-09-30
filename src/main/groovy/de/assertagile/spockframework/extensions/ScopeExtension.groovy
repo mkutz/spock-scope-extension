@@ -1,5 +1,6 @@
 package de.assertagile.spockframework.extensions
 
+import groovy.util.logging.Slf4j
 import org.spockframework.runtime.extension.AbstractAnnotationDrivenExtension
 import org.spockframework.runtime.model.FeatureInfo
 import org.spockframework.runtime.model.SpecInfo
@@ -15,49 +16,19 @@ import org.spockframework.runtime.model.SpecInfo
  * a list of configured scopes.
  * </p>
  */
+@Slf4j
 public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
 
     /** {@link ConfigObject} for the extension. */
     private ConfigObject config
+
+    /** The {@link List} of currently selected scopes. */
     private List<String> currentScopes
-    private List<String> scopes
 
     /**
      * Standard constructor.
      */
-    public ScopeExtension() {
-    }
-
-    private ConfigObject getConfig() {
-        if (!config) {
-            URL configUrl = getClass().getClassLoader().getResource("SpockScopeConfig.groovy")
-            config = configUrl ? new ConfigSlurper().parse(configUrl) : new ConfigObject()
-        }
-        return config
-    }
-
-    private List<String> getCurrentScopes() {
-        if (currentScopes == null) {
-            currentScopes = getConfig().get("currentScopes") ?: []
-        }
-        return currentScopes
-    }
-
-    private List<String> getScopes() {
-        if (scopes == null) {
-            scopes = getConfig().get("scopes")?: []
-        }
-        return scopes
-    }
-
-    private isInCurrentScope(Scope annotation) {
-        if (!getCurrentScopes()) return true
-        List<String> specOrFeatureScopes = annotation.value() ?: []
-        if (!getScopes().containsAll(specOrFeatureScopes)) {
-            throw new IllegalArgumentException("Specified scopes ${specOrFeatureScopes - getScopes()} are not configured! All used scopes must be added to the SpockScopeConfig.groovy file.")
-        }
-        return !getCurrentScopes().disjoint(specOrFeatureScopes)
-    }
+    public ScopeExtension() {}
 
     /**
      * Called when a marked specification type is visited. Sets the whole {@link SpecInfo} to be ignored if not in one
@@ -69,7 +40,10 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
      *          the {@link SpecInfo} for the visited specification class.
      */
     public void visitSpecAnnotation(Scope annotation, SpecInfo spec) {
-        spec.setSkipped(!isInCurrentScope(annotation))
+        if (!isInCurrentScope(annotation)) {
+            log.debug("Skipping ${spec.name} for it is not in current scope (${currentScopes})")
+            spec.setSkipped(true)
+        }
     }
 
     /**
@@ -82,6 +56,34 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
      *          the {@link FeatureInfo} for the visited feature method.
      */
     public void visitFeatureAnnotation(Scope annotation, FeatureInfo feature) {
-        feature.setSkipped(!isInCurrentScope(annotation))
+        if (!isInCurrentScope(annotation)) {
+            log.debug("Skipping ${feature.name} for it is not in current scope (${currentScopes})")
+            feature.setSkipped(true)
+        }
+    }
+
+    private ConfigObject getConfig() {
+        if (!config) {
+            URL configUrl = getClass().getClassLoader().getResource("SpockScopeConfig.groovy")
+            config = configUrl ? new ConfigSlurper().parse(configUrl) : new ConfigObject()
+        }
+        return config
+    }
+
+    private List<String> getCurrentScopes() {
+        if (currentScopes == null) {
+            if (System.getProperty("spock.scopes")) {
+                currentScopes = System.getProperty("spock.scopes")?.split(/\s*,\s*/)
+            } else {
+                currentScopes = getConfig().get("currentScopes") ?: []
+            }
+        }
+        return currentScopes
+    }
+
+    private isInCurrentScope(Scope annotation) {
+        if (!getCurrentScopes()) return true
+        List<String> specOrFeatureScopes = annotation.value() ?: []
+        return !getCurrentScopes().disjoint(specOrFeatureScopes)
     }
 }
