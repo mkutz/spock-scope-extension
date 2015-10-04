@@ -4,12 +4,14 @@ Spock Scope Extension
 [![Build Status](https://travis-ci.org/mkutz/spock-scope-extension.svg?branch=master)](https://travis-ci.org/mkutz/spock-scope-extension) [![Coverage Status](https://img.shields.io/coveralls/mkutz/spock-scope-extension.svg)](https://coveralls.io/r/mkutz/spock-scope-extension)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.assertagile.spockframework.extensions/spock-scope-extension/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.assertagile.spockframework.extensions/spock-scope-extension)
 
-An extension to mark tests as belonging to a (set of) scopes (e.g. a global feature or a major aspect of the application) for the Spock Framework (see http://spockframework.org/).
+An extension to mark tests as belonging to a (set of) scopes (e.g. a global feature or a major aspect of the application) for the [Spock Framework](see http://spockframework.org/).
 
-When executing a Specification marked `@Scope(["a", "b"])` and the configured current scope is `["c", "d"]`, the test will be set "ignored" while all tests that are marked with a set of scopes containing at least one `"c"` or `"d"`.
+When executing a Specification marked `@Scope(["feature a", "feature b"])` and the configured current scope is `["feature c", "feature d"]`, the test will be set "ignored" while all tests that are marked with a set of scopes containing at least one `"feature c"` or `"feature d"` will still be executed. Specification not having a `@Scope` annotation will be executed as well.
 
 Usage
 -----
+
+For a detailed view on how to use this extension please have a look into the [demonstation folder](https://github.com/mkutz/spock-scope-extension/tree/master/demonstration) of this repository.
 
 Add this as a test dependency to your project.
 
@@ -35,8 +37,3 @@ currentScopes = ["feature a", "feature c"]
 Note that if `currentScopes` is empty or not configured at all the extension will not ignore any test.
 
 Also note that the `-Dspock.scopes=…` parameter will always replace the configuration in `SpockScopeConfig.groovy` if given.
-
-Not yet implemented/Ideas
--------------------------
-
-- scopes may be better defined as an Enum, so it is refactorable and autocompletable in IDE's.
