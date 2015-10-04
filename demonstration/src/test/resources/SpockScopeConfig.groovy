@@ -1,0 +1,3 @@
+scopes =
+
+currentScopes = ["feature c"]
