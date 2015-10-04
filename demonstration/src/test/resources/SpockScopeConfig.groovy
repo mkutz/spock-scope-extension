@@ -1,3 +1,3 @@
 import static de.assertagile.demonstration.TestScopes.*
 
-currentScopes = FEATURE_A
+currentScopes = [FEATURE_A]
