@@ -1,3 +1,3 @@
-scopes =
+import static de.assertagile.demonstration.TestScopes.*
 
-currentScopes = ["feature c"]
+currentScopes = FEATURE_A
