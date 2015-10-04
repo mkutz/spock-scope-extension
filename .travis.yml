@@ -1,3 +1,3 @@
 language: groovy
-after_success:
-  - mvn clean test jacoco:report coveralls:report
+script:
+  - cd spock-scope-extension/ && mvn clean test jacoco:report coveralls:report
