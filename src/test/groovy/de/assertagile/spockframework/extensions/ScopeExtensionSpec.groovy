@@ -1,5 +1,6 @@
 package de.assertagile.spockframework.extensions
 
+import org.spockframework.runtime.model.FeatureInfo
 import org.spockframework.runtime.model.SpecInfo
 import spock.lang.Specification
 import spock.lang.Subject
@@ -13,7 +14,7 @@ class ScopeExtensionSpec extends Specification {
     @Subject
     ScopeExtension scopeExtension = new ScopeExtension(config: configMock)
 
-    def "if there are no currentScopes all should be executed"() {
+    def "if there are no currentScopes all specs should be executed"() {
         given:
         SpecInfo specInfoMock = Mock() { getName() >> "MockedSpec" }
         Scope scope = Mock()
@@ -24,6 +25,19 @@ class ScopeExtensionSpec extends Specification {
         then:
         0 * specInfoMock.setSkipped(true)
     }
+
+    def "if there are no currentScopes all featurs should be executed"() {
+        given:
+        FeatureInfo featureInfoMock = Mock() { getName() >> "I am a mocked feature" }
+        Scope scope = Mock()
+
+        when:
+        scopeExtension.visitFeatureAnnotation(scope, featureInfoMock)
+
+        then:
+        0 * featureInfoMock.setSkipped(true)
+    }
+
 
     def "if the spec does not have any scope and there are current scopes set, it should be ignored"() {
         given:
@@ -41,6 +55,23 @@ class ScopeExtensionSpec extends Specification {
         1 * specInfoMock.setSkipped(true)
     }
 
+    def "if the feature does not have any scope and there are current scopes set, it should be ignored"() {
+        given:
+        setCurrentScopes("a,b")
+
+        FeatureInfo featureInfoMock = Mock() { getName() >> "I am a mocked feature" }
+        Scope scope = Mock() {
+            value() >> null
+        }
+
+        when:
+        scopeExtension.visitFeatureAnnotation(scope, featureInfoMock)
+
+        then:
+        1 * featureInfoMock.setSkipped(true)
+    }
+
+
     def "if the spec does have a scope which is not in the current scope, it should be ignored"() {
         given:
         setCurrentScopes("a,b")
@@ -57,6 +88,23 @@ class ScopeExtensionSpec extends Specification {
         1 * specInfoMock.setSkipped(true)
     }
 
+    def "if the feature does have a scope which is not in the current scope, it should be ignored"() {
+        given:
+        setCurrentScopes("a,b")
+
+        FeatureInfo featureInfoMock = Mock() { getName() >> "I am a mocked feature" }
+        Scope scope = Mock() {
+            value() >> ["d"]
+        }
+
+        when:
+        scopeExtension.visitFeatureAnnotation(scope, featureInfoMock)
+
+        then:
+        1 * featureInfoMock.setSkipped(true)
+    }
+
+
     def "if the spec does have a scope which is in the current scope, it should not be ignored"() {
         given:
         setCurrentScopes("a,b")
@@ -71,6 +119,22 @@ class ScopeExtensionSpec extends Specification {
 
         then:
         0 * specInfoMock.setSkipped(true)
+    }
+
+    def "if the feature does have a scope which is in the current scope, it should not be ignored"() {
+        given:
+        setCurrentScopes("a,b")
+
+        FeatureInfo featureInfoMock = Mock() { getName() >> "I am a mocked feature" }
+        Scope scope = Mock() {
+            value() >> ["a"]
+        }
+
+        when:
+        scopeExtension.visitFeatureAnnotation(scope, featureInfoMock)
+
+        then:
+        0 * featureInfoMock.setSkipped(true)
     }
 
     def cleanup() {
