@@ -3,17 +3,19 @@ package de.assertagile.demonstration
 import de.assertagile.spockframework.extensions.Scope
 import spock.lang.Specification
 
+import static de.assertagile.demonstration.TestScopes.*
 
-@Scope(["feature a", "feature b"])
+
+@Scope([FEATURE_A, FEATURE_B])
 class ScopedSpec extends Specification {
 
-    @Scope("feature a")
+    @Scope(FEATURE_A)
     def "this is important for feature a"() {
         expect:
         true
     }
 
-    @Scope("feature b")
+    @Scope(FEATURE_B)
     def "this is important for feature b"() {
         expect:
         true
