@@ -37,3 +37,8 @@ currentScopes = ["feature a", "feature c"]
 Note that if `currentScopes` is empty or not configured at all the extension will not ignore any test.
 
 Also note that the `-Dspock.scopes=…` parameter will always replace the configuration in `SpockScopeConfig.groovy` if given.
+
+Planned Features for next Version
+---------------------------------
+
+* Parameter and configuration for excluded scopes `-Dspock.excludedScopes`
