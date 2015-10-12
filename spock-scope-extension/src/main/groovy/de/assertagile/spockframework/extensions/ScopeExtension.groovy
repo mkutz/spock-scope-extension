@@ -22,8 +22,11 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
     /** {@link ConfigObject} for the extension. */
     private ConfigObject config
 
-    /** The {@link List} of currently selected scopes. */
-    private List<String> currentScopes
+    /** The {@link List} of currently inclided scopes. */
+    private List<String> includedScopes
+
+    /** The {@link List} of currently excluded scopes. */
+    private List<String> excludedScopes
 
     /**
      * Standard constructor.
@@ -32,7 +35,7 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
 
     /**
      * Called when a marked specification type is visited. Sets the whole {@link SpecInfo} to be ignored if not in one
-     * of the current scopes.
+     * of the included scopes.
      *
      * @param annotation
      *          the {@link Scope} annotation at the specification type. Contains the specification's scopes.
@@ -40,15 +43,15 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
      *          the {@link SpecInfo} for the visited specification class.
      */
     public void visitSpecAnnotation(Scope annotation, SpecInfo spec) {
-        if (!isInCurrentScope(annotation)) {
-            log.debug("Skipping ${spec.name} for it is not in current scope (${currentScopes})")
+        if (!isInIncludedScopes(annotation) || isInExcludedScopes(annotation)) {
+            log.debug("Skipping ${spec.name} for it is not in included scope (${includedScopes})")
             spec.setSkipped(true)
         }
     }
 
     /**
      * Called when a marked feature method is visited. Sets the {@link FeatureInfo} to be ignored if not in one of the
-     * current scopes.
+     * included scopes.
      *
      * @param annotation
      *          the {@link Scope} annotation at the specification type. Contains the specification's scopes.
@@ -56,8 +59,8 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
      *          the {@link FeatureInfo} for the visited feature method.
      */
     public void visitFeatureAnnotation(Scope annotation, FeatureInfo feature) {
-        if (!isInCurrentScope(annotation)) {
-            log.debug("Skipping ${feature.name} for it is not in current scope (${currentScopes})")
+        if (!isInIncludedScopes(annotation) || isInExcludedScopes(annotation)) {
+            log.debug("Skipping ${feature.name} for it is not in included scope (${includedScopes})")
             feature.setSkipped(true)
         }
     }
@@ -70,20 +73,37 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
         return config
     }
 
-    private List<String> getCurrentScopes() {
-        if (currentScopes == null) {
+    private List<String> getIncludedScopes() {
+        if (includedScopes == null) {
             if (System.getProperty("spock.scopes")) {
-                currentScopes = System.getProperty("spock.scopes")?.split(/\s*,\s*/)
+                includedScopes = System.getProperty("spock.scopes")?.split(/\s*,\s*/)
             } else {
-                currentScopes = getConfig().get("currentScopes") ?: []
+                includedScopes = getConfig().get("includedScopes") ?: []
             }
         }
-        return currentScopes
+        return includedScopes
     }
 
-    private isInCurrentScope(Scope annotation) {
-        if (!getCurrentScopes()) return true
+    private List<String> getExcludedScopes() {
+        if (excludedScopes == null) {
+            if (System.getProperty("spock.excludedScopes")) {
+                excludedScopes = System.getProperty("spock.excludedScopes")?.split(/\s*,\s*/)
+            } else {
+                excludedScopes = getConfig().get("excludedScopes") ?: []
+            }
+        }
+        return excludedScopes
+    }
+
+    private isInIncludedScopes(Scope annotation) {
+        if (!getIncludedScopes()) return true
         List<String> specOrFeatureScopes = annotation.value() ?: []
-        return !getCurrentScopes().disjoint(specOrFeatureScopes)
+        return !getIncludedScopes().disjoint(specOrFeatureScopes)
+    }
+
+    private isInExcludedScopes(Scope annotation) {
+        if (!getExcludedScopes()) return false
+        List<String> specOrFeatureScopes = annotation.value() ?: []
+        return !getExcludedScopes().disjoint(specOrFeatureScopes)
     }
 }
