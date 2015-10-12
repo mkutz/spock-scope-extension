@@ -27,3 +27,8 @@ gradlew.bat
 
 # Maven files
 target/
+
+# Eclipse files
+.project
+.classpath
+.settings/
