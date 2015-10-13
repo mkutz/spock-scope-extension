@@ -26,6 +26,7 @@ Config File
 
 If you use an IDE it is quite inconviniet to use `-D` parameters. For this case you can use [SpockScopeConfig.groovy](https://github.com/mkutz/spock-scope-extension/blob/master/demonstration/src/test/resources/SpockScopeConfig.groovy) to set your scope.
 
-As you can see the `currentScopes` variable is set to "feature a" in the example file. Therefore if you execute the whole `Specification` in your IDE, the second feature method is ignored (by the way: it also is ignored if you `mvn test` without the `-Dspock.scopes` parameter).
+As you can see the `includedScopes` variable is set to "feature a" in the example file. Therefore if you execute the whole `Specification` in your IDE, the second feature method is ignored (by the way: it also is ignored if you `mvn test` without the `-Dspock.scopes` parameter).
 
 Try to change the file's content and you will see how the behaviour changes.
+For example try to set `excludedScopes` to exclude certain scopes.
