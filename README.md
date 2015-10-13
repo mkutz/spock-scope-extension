@@ -27,18 +27,20 @@ For instance in your pom.xml:
 
 Now you can mark your `Specification`s with the `@Scope(…)` annotation with one or more strings representing scopes.
 
-When you execute your tests you can pass `-Dspock.scopes=…` to your test execution, all tests that are not annotated with at least one of the given scopes, it will be ignored.
+When you execute your tests you can pass `-Dspock.scopes=…` to your test execution, all tests that are not annotated with at least one of the given scopes, it will be ignored. Since version 0.2 you can as well pass `-Dspock.excludedScopes=…` to ignore all tests that have at least one of the given scopes.
 
-To ease usage in IDE's you can as well create a `SpockScopeConfig.groovy` to your projects resources and add a list of `currentScopes` instead of the `-Dspock.scopes=…` parameter:
+To ease usage in IDE's you can as well create a `SpockScopeConfig.groovy` to your projects resources and add a list of `includedScopes` and `excludedScopes` instead of the `-Dspock.scopes=…` and `-Dspock.excludedScopes=…` parameters:
 ```groovy
-currentScopes = ["feature a", "feature c"]
+includedScopes = ["feature a", "feature c"]
+excludedScopes = ["feature b"]
 ```
 
-Note that if `currentScopes` is empty or not configured at all the extension will not ignore any test.
+Note that if `includedScopes` is empty or not configured at all the extension will not ignore any test.
 
-Also note that the `-Dspock.scopes=…` parameter will always replace the configuration in `SpockScopeConfig.groovy` if given.
+Also note that the `-Dspock.scopes=…` and `-Dspock.excludedScopes=…` parameters will always replace the configuration in `SpockScopeConfig.groovy` if given.
 
 Planned Features for next Version
 ---------------------------------
 
-* Parameter and configuration for excluded scopes `-Dspock.excludedScopes`
+* ~~Parameter and configuration for excluded scopes `-Dspock.excludedScopes`~~ added sice 0.2
+* Allow scopes to be classes instead of strings for using non-inline constants in annotations cause issues in strict compilers (for instance visiblie in Eclipse IDE)
