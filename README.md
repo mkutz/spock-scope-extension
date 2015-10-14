@@ -44,3 +44,4 @@ Planned Features for next Version
 
 * ~~Parameter and configuration for excluded scopes `-Dspock.excludedScopes`~~ added sice 0.2
 * Allow scopes to be classes instead of strings for using non-inline constants in annotations cause issues in strict compilers (for instance visiblie in Eclipse IDE)
+* Implicit scopes: spec name, package, …
