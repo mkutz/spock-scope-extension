@@ -39,7 +39,7 @@
         <dependency>
             <groupId>de.assertagile.spockframework.extensions</groupId>
             <artifactId>spock-scope-extension</artifactId>
-            <version>0.2-SNAPSHOT</version>
+            <version>0.2</version>
             <scope>test</scope>
         </dependency>
 
