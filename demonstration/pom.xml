@@ -39,20 +39,20 @@
         <dependency>
             <groupId>de.assertagile.spockframework.extensions</groupId>
             <artifactId>spock-scope-extension</artifactId>
-            <version>0.2</version>
+            <version>0.3-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.3.11</version>
+            <version>2.4.5</version>
         </dependency>
 
         <dependency>
             <groupId>org.spockframework</groupId>
             <artifactId>spock-core</artifactId>
-            <version>1.0-groovy-2.3</version>
+            <version>1.0-groovy-2.4</version>
             <scope>test</scope>
         </dependency>
 
@@ -97,7 +97,7 @@
                         <dependency>
                             <groupId>org.codehaus.groovy</groupId>
                             <artifactId>groovy-eclipse-batch</artifactId>
-                            <version>2.3.7-01</version>
+                            <version>2.4.3-01</version>
                         </dependency>
                     </dependencies>
                 </plugin>

@@ -3,9 +3,6 @@ package de.assertagile.spockframework.extensions
 import org.spockframework.runtime.model.SpecInfo
 import spock.lang.Specification
 
-import static de.assertagile.spockframework.extensions.Scopes.*
-
-
 class SpockScopeConfigSpec extends Specification {
 
     def "config should be read from SpockScopeConfig.groovy if not mocked"() {
@@ -13,9 +10,9 @@ class SpockScopeConfigSpec extends Specification {
         ScopeExtension scopeExtension = new ScopeExtension()
 
         SpecInfo scopeASpecInfoMock = Mock() { getName() >> "MockedASpec" }
-        Scope scopeA = Mock() { value() >> [FEATURE_A] }
+        Scope scopeA = Mock() { value() >> [SpecScopes.A] }
         SpecInfo scopeBSpecInfoMock = Mock() { getName() >> "MockedBSpec" }
-        Scope scopeB = Mock() { value() >> [FEATURE_B] }
+        Scope scopeB = Mock() { value() >> [SpecScopes.B] }
 
         when:
         scopeExtension.visitSpecAnnotation(scopeA, scopeASpecInfoMock)

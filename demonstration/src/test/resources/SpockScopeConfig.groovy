@@ -1,3 +1,3 @@
-import static de.assertagile.demonstration.TestScopes.*
+import de.assertagile.demonstration.SpecScopes
 
-includedScopes = [FEATURE_A]
+includedScopes = [SpecScopes.FeatureA]

@@ -1,4 +1,4 @@
-import static de.assertagile.spockframework.extensions.Scopes.*
+import de.assertagile.spockframework.extensions.SpecScopes
 
-includedScopes = [FEATURE_A]
-excludedScopes = [FEATURE_B]
+includedScopes = [SpecScopes.A]
+excludedScopes = [SpecScopes.B]

@@ -22,7 +22,7 @@ import java.lang.annotation.Target
 public @interface Scope {
 
     /**
-     * @return a scope or a set of scopes.
+     * @return a scope or a set of scopes identified as subclasses of {@link SpecScope}.
      */
-    String[] value();
+    Class<? extends SpecScope>[] value();
 }

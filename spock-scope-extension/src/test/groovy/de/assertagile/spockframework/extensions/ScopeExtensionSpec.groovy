@@ -6,6 +6,11 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Unroll
 
+import de.assertagile.spockframework.extensions.SpecScopes.A
+import de.assertagile.spockframework.extensions.SpecScopes.B
+import de.assertagile.spockframework.extensions.SpecScopes.C
+import de.assertagile.spockframework.extensions.SpecScopes.D
+
 class ScopeExtensionSpec extends Specification {
 
     String originalIncludedScopes = System.getProperty("spock.scopes", "")
@@ -27,10 +32,14 @@ class ScopeExtensionSpec extends Specification {
     def "only tests in included scopes should be executed, while tests in excluded scopes should always be skipped"(
             List<String> includedScopes, List<String> excludedScopes, List<String> specOrFeatureScopes, Skipped skipped) {
         given:
-        setIncludedScopes(includedScopes.join(","))
-        setExcludedScopes(excludedScopes.join(","))
+        setIncludedScopes(includedScopes)
+        setExcludedScopes(excludedScopes)
+
+        and:
         FeatureInfo featureInfoMock = Mock() { getName() >> "I am a mocked feature" }
         SpecInfo specInfoMock = Mock() { getName() >> "MockedSpec" }
+
+        and:
         Scope scopeMock = Mock() { value() >> specOrFeatureScopes }
 
         when:
@@ -44,26 +53,26 @@ class ScopeExtensionSpec extends Specification {
         where:
         includedScopes | excludedScopes | specOrFeatureScopes || skipped
         []             | []             | []                  || Skipped.NOT_SKIPPED // execution not scoped
-        ["a"]          | []             | ["a"]               || Skipped.NOT_SKIPPED // in scope
-        ["a"]          | []             | []                  || Skipped.SKIPPED     // not in scope
-        ["a"]          | ["a"]          | ["a"]               || Skipped.SKIPPED     // excluded and included
-        ["a"]          | ["a"]          | []                  || Skipped.SKIPPED     // empty scope, scoped execution
-        ["a", "b"]     | ["c", "d"]     | ["a"]               || Skipped.NOT_SKIPPED // in scope, multiple scopes
-        ["a", "b"]     | ["c", "d"]     | ["c"]               || Skipped.SKIPPED     // not in scope, multiple scopes
-        ["a"]          | []             | ["a", "c"]          || Skipped.NOT_SKIPPED // included, multiple test scopes
-        []             | ["a"]          | ["a", "c"]          || Skipped.SKIPPED     // excluded, multiple test scopes
+        [A]            | []             | [A]                 || Skipped.NOT_SKIPPED // in scope
+        [A]            | []             | []                  || Skipped.SKIPPED     // not in scope
+        [A]            | [A]            | [A]                 || Skipped.SKIPPED     // excluded and included
+        [A]            | [A]            | []                  || Skipped.SKIPPED     // empty scope, scoped execution
+        [A, B]         | [C, D]         | [A]                 || Skipped.NOT_SKIPPED // in scope, multiple scopes
+        [A, B]         | [C, D]         | [C]                 || Skipped.SKIPPED     // not in scope, multiple scopes
+        [A]            | []             | [A, C]              || Skipped.NOT_SKIPPED // included, multiple test scopes
+        []             | [A]            | [A, C]              || Skipped.SKIPPED     // excluded, multiple test scopes
     }
 
     def cleanup() {
         resetScopes()
     }
 
-    private void setIncludedScopes(String newScopes) {
-        System.setProperty("spock.scopes", newScopes)
+    private void setIncludedScopes(List<? extends Class<SpecScope>> newScopes) {
+        System.setProperty("spock.scopes", newScopes*.simpleName.join(","))
     }
 
-    private void setExcludedScopes(String newExcludedScopes) {
-        System.setProperty("spock.excludedScopes", newExcludedScopes)
+    private void setExcludedScopes(List<? extends SpecScope> newExcludedScopes) {
+        System.setProperty("spock.excludedScopes", newExcludedScopes*.simpleName.join(","))
     }
 
     private void resetScopes() {

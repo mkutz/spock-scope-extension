@@ -12,7 +12,7 @@ import org.spockframework.runtime.model.SpecInfo
  * </p>
  *
  * <p>
- * Just mark a singe feature method or a whole {@link spock.lang.Specification} with the annotation {@link Scope} and
+ * Just mark a single feature method or a whole {@link spock.lang.Specification} with the annotation {@link Scope} and
  * a list of configured scopes.
  * </p>
  */
@@ -78,7 +78,11 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
             if (System.getProperty("spock.scopes")) {
                 includedScopes = System.getProperty("spock.scopes")?.split(/\s*,\s*/)
             } else {
-                includedScopes = getConfig().get("includedScopes") ?: []
+                includedScopes = (getConfig().get("includedScopes") ?: []).collect {
+                    if (it instanceof Class<? extends SpecScope>) return it.simpleName
+                    else if (it instanceof String) return it
+                    else throw new IllegalArgumentException("Configured scopes must be either strings or subclasses of SpecScope!")
+                }
             }
         }
         return includedScopes
@@ -89,7 +93,11 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
             if (System.getProperty("spock.excludedScopes")) {
                 excludedScopes = System.getProperty("spock.excludedScopes")?.split(/\s*,\s*/)
             } else {
-                excludedScopes = getConfig().get("excludedScopes") ?: []
+                excludedScopes = (getConfig().get("excludedScopes") ?: []).collect {
+                    if (it instanceof Class<? extends SpecScope>) return it.simpleName
+                    else if (it instanceof String) return it
+                    else throw new IllegalArgumentException("Configured scopes must be either strings or subclasses of SpecScope!")
+                }
             }
         }
         return excludedScopes
@@ -97,13 +105,13 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
 
     private isInIncludedScopes(Scope annotation) {
         if (!getIncludedScopes()) return true
-        List<String> specOrFeatureScopes = annotation.value() ?: []
-        return !getIncludedScopes().disjoint(specOrFeatureScopes)
+        List<Class<? extends SpecScope>> specOrFeatureScopes = annotation.value() ?: []
+        return !getIncludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }
 
     private isInExcludedScopes(Scope annotation) {
         if (!getExcludedScopes()) return false
-        List<String> specOrFeatureScopes = annotation.value() ?: []
-        return !getExcludedScopes().disjoint(specOrFeatureScopes)
+        List<Class<? extends SpecScope>> specOrFeatureScopes = annotation.value() ?: []
+        return !getExcludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }
 }
