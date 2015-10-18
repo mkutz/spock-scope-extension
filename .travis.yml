@@ -1,6 +1,8 @@
 language: groovy
 script:
-- cd spock-scope-extension/ && mvn clean deploy jacoco:report coveralls:report --settings settings.xml
+- cd spock-scope-extension/ && mvn clean test jacoco:report coveralls:report --settings settings.xml
+after_success:
+- cd spock-scope-extension/ && mvn deploy -DskipTests --settings settings.xml
 env:
   global:
     - secure: "mGyYl8DpINlquhgsDjRCCW304uQ2elOysp9qJ4U02oQ9SPfe2oZJDfUCCdmhD+DerX1OGsZE7Y54HXHIcJn7qkWTnguVKAjH2gDa0a5A2ayiTqP2c0sKqzTvVJg87v8Ouos/nN4EdOcj4t/+Xs89E5x2B0Dh6yjtK2k2QrcKITvrH7AOhUXEy/pSaPdaJxIH2CUxgqcSvuBHuq3ilu9EVRSz8rJgaflRLvai+rq1u7iGTtdiYv0/qvNL3DOnTjEIzs0NPddY/bxyxcUrFpDVXiUKpDYmF7UqgZ910w5ocL/Nr3ux3MVU+RZoXNjcS4RiEgOx1At6/dgpvytGHCXPat11VmnWC7uW1XcLehTgDjymDMz+kTQuZMwv78tF/AuY8coHT2uDXoZCUTIrqDp2usx+/z3O4BNdZ6PW2xk+JwEGJHJmgKKaP92EigDvFXWnbMYKZDxWpTlrjW7sgqYBUIx6TroA1Lz0hcYqHaTQWRz2ojapdKmQrE8Mwp47+tS8NvlRA+IlraBUHzhhJ+XlJU0U5aWwhoDq7nlXVImRdHmzpm/aEw6i39YXdZGcroiTuJbKjDADIHVnj9HVX32VLaizesE9sfJtDp1Lfe8G8Lx8fG+l2oVDQyepZQRVOPs5CMrkZkDxecxt/geXu4oljMoBhdUvP5zW+2Sqrq0NALo="
