@@ -22,11 +22,11 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
     /** {@link ConfigObject} for the extension. */
     private ConfigObject config
 
-    /** The {@link List} of currently inclided scopes. */
-    private List<String> includedScopes
+    /** The {@link Set} of currently included scopes. */
+    private Set<String> includedScopes
 
-    /** The {@link List} of currently excluded scopes. */
-    private List<String> excludedScopes
+    /** The {@link Set} of currently excluded scopes. */
+    private Set<String> excludedScopes
 
     /**
      * Standard constructor.
@@ -73,7 +73,7 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
         return config
     }
 
-    private List<String> getIncludedScopes() {
+    private Set<String> getIncludedScopes() {
         if (includedScopes == null) {
             if (System.getProperty("spock.scopes")) {
                 includedScopes = System.getProperty("spock.scopes")?.split(/\s*,\s*/)
@@ -88,7 +88,7 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
         return includedScopes
     }
 
-    private List<String> getExcludedScopes() {
+    private Set<String> getExcludedScopes() {
         if (excludedScopes == null) {
             if (System.getProperty("spock.excludedScopes")) {
                 excludedScopes = System.getProperty("spock.excludedScopes")?.split(/\s*,\s*/)
