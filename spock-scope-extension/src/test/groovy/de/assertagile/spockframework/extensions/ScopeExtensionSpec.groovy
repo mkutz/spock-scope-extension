@@ -1,15 +1,14 @@
 package de.assertagile.spockframework.extensions
 
+import de.assertagile.spockframework.extensions.SpecScopes.A
+import de.assertagile.spockframework.extensions.SpecScopes.B
+import de.assertagile.spockframework.extensions.SpecScopes.C
+import de.assertagile.spockframework.extensions.SpecScopes.D
 import org.spockframework.runtime.model.FeatureInfo
 import org.spockframework.runtime.model.SpecInfo
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Unroll
-
-import de.assertagile.spockframework.extensions.SpecScopes.A
-import de.assertagile.spockframework.extensions.SpecScopes.B
-import de.assertagile.spockframework.extensions.SpecScopes.C
-import de.assertagile.spockframework.extensions.SpecScopes.D
 
 class ScopeExtensionSpec extends Specification {
 
@@ -22,22 +21,21 @@ class ScopeExtensionSpec extends Specification {
         SKIPPED, NOT_SKIPPED
 
         public boolean asBoolean() { this == SKIPPED }
+
         public String toString() { super.toString().toLowerCase().replace("_", " ") }
     }
 
     @Subject
     ScopeExtension scopeExtension = new ScopeExtension(config: configMock)
 
-    @Unroll("with #includedScopes included and #excludedScopes excluded, a feature or spec with scopes #specOrFeatureScopes should be #skipped")
-    def "only tests in included scopes should be executed, while tests in excluded scopes should always be skipped"(
-            List<String> includedScopes, List<String> excludedScopes, List<String> specOrFeatureScopes, Skipped skipped) {
-        given:
-        setIncludedScopes(includedScopes)
-        setExcludedScopes(excludedScopes)
+    FeatureInfo featureInfoMock = Mock() { getName() >> "I am a mocked feature" }
+    SpecInfo specInfoMock = Mock() { getName() >> "MockedSpec" }
 
-        and:
-        FeatureInfo featureInfoMock = Mock() { getName() >> "I am a mocked feature" }
-        SpecInfo specInfoMock = Mock() { getName() >> "MockedSpec" }
+    @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #skipped")
+    def "only tests in included scopes should be executed, while tests in excluded scopes should always be skipped"(
+        Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes, Set<Class<? extends SpecScope>> specOrFeatureScopes, Skipped skipped) {
+        given:
+        setSystemParameters(includedScopes, excludedScopes)
 
         and:
         Scope scopeMock = Mock() { value() >> specOrFeatureScopes }
@@ -63,20 +61,69 @@ class ScopeExtensionSpec extends Specification {
         []             | [A]            | [A, C]              || Skipped.SKIPPED     // excluded, multiple test scopes
     }
 
+    @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #skipped")
+    def "only tests in included scopes should be executed, while tests in excluded scopes should always be skipped"(
+        List<String> includedScopes, List<String> excludedScopes, List<String> specOrFeatureScopes, Skipped skipped) {
+        given:
+        setConfigParameters(includedScopes, excludedScopes)
+
+        and:
+        Scope scopeMock = Mock() { value() >> specOrFeatureScopes }
+
+        when:
+        scopeExtension.visitSpecAnnotation(scopeMock, specInfoMock)
+        scopeExtension.visitFeatureAnnotation(scopeMock, featureInfoMock)
+
+        then:
+        (skipped ? 1 : 0) * specInfoMock.setSkipped(true)
+        (skipped ? 1 : 0) * featureInfoMock.setSkipped(true)
+
+        where:
+        includedScopes | excludedScopes | specOrFeatureScopes || skipped
+        ["A"]          | []             | [A]                 || Skipped.NOT_SKIPPED // in scope
+        ["A"]          | []             | []                  || Skipped.SKIPPED     // not in scope
+        ["A"]          | ["A"]          | [A]                 || Skipped.SKIPPED     // excluded and included
+        ["A"]          | ["A"]          | []                  || Skipped.SKIPPED     // empty scope, scoped execution
+        ["A", "B"]     | ["C", "D"]     | [A]                 || Skipped.NOT_SKIPPED // in scope, multiple scopes
+        ["A", "B"]     | ["C", "D"]     | [C]                 || Skipped.SKIPPED     // not in scope, multiple scopes
+        ["A"]          | []             | [A, C]              || Skipped.NOT_SKIPPED // included, multiple test scopes
+        []             | ["A"]          | [A, C]              || Skipped.SKIPPED     // excluded, multiple test scopes
+    }
+
+    def "using something else, but Strings or SpecScope subclasses in config should cause an exception"(
+        List<Object> includedScopes, List<Object> excludedScopes) {
+        given:
+        setConfigParameters(includedScopes, excludedScopes)
+
+        when:
+        scopeExtension.visitSpecAnnotation(Mock(Scope), specInfoMock)
+        scopeExtension.visitFeatureAnnotation(Mock(Scope), featureInfoMock)
+
+        then:
+        thrown(IllegalArgumentException)
+
+        where:
+        includedScopes | excludedScopes
+        [new Object()] | []
+        []             | [new Object()]
+    }
+
     def cleanup() {
-        resetScopes()
+        resetSystemParameters()
     }
 
-    private void setIncludedScopes(List<? extends Class<SpecScope>> newScopes) {
-        System.setProperty("spock.scopes", newScopes*.simpleName.join(","))
+    private void setSystemParameters(Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes) {
+        System.setProperty("spock.scopes", includedScopes*.simpleName.join(","))
+        System.setProperty("spock.excludedScopes", excludedScopes*.simpleName.join(","))
     }
 
-    private void setExcludedScopes(List<? extends SpecScope> newExcludedScopes) {
-        System.setProperty("spock.excludedScopes", newExcludedScopes*.simpleName.join(","))
-    }
-
-    private void resetScopes() {
+    private void resetSystemParameters() {
         System.setProperty("spock.scopes", originalIncludedScopes)
         System.setProperty("spock.excludedScopes", originalExcludedScopes)
+    }
+
+    private void setConfigParameters(def includedScopes, def excludedScopes) {
+        configMock.get("includedScopes") >> includedScopes
+        configMock.get("excludedScopes") >> excludedScopes
     }
 }

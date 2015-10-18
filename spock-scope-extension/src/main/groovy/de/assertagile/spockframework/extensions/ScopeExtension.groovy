@@ -44,9 +44,10 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
      */
     public void visitSpecAnnotation(Scope annotation, SpecInfo spec) {
         if (!isInIncludedScopes(annotation) || isInExcludedScopes(annotation)) {
-            log.debug("Skipping ${spec.name} for it is not in included scope (${includedScopes})")
+            log.info("Skipping ${spec.name} for its scope ${annotation.value()} is not in included scope (${includedScopes}) or is in excluded scope (${excludedScopes})")
             spec.setSkipped(true)
         }
+        log.debug("Executing ${spec.name} for its scope ${annotation.value()} is in included scope (${includedScopes}) and not in excluded scope (${excludedScopes})")
     }
 
     /**
@@ -60,9 +61,10 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
      */
     public void visitFeatureAnnotation(Scope annotation, FeatureInfo feature) {
         if (!isInIncludedScopes(annotation) || isInExcludedScopes(annotation)) {
-            log.debug("Skipping ${feature.name} for it is not in included scope (${includedScopes})")
+            log.info("Skipping ${feature.name} for its scope ${annotation.value()} is not in included scope (${includedScopes}) or is in excluded scope (${excludedScopes})")
             feature.setSkipped(true)
         }
+        log.debug("Executing ${feature.name} for its scope ${annotation.value()} is in included scope (${includedScopes}) and not in excluded scope (${excludedScopes})")
     }
 
     private ConfigObject getConfig() {
@@ -81,7 +83,7 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
                 includedScopes = (getConfig().get("includedScopes") ?: []).collect {
                     if (it instanceof Class<? extends SpecScope>) return it.simpleName
                     else if (it instanceof String) return it
-                    else throw new IllegalArgumentException("Configured scopes must be either strings or subclasses of SpecScope!")
+                    else throw new IllegalArgumentException("Configured scopes must be either strings or subclasses of SpecScope! \"${it}\" is ${it.class.simpleName}.")
                 }
             }
         }
@@ -96,7 +98,7 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
                 excludedScopes = (getConfig().get("excludedScopes") ?: []).collect {
                     if (it instanceof Class<? extends SpecScope>) return it.simpleName
                     else if (it instanceof String) return it
-                    else throw new IllegalArgumentException("Configured scopes must be either strings or subclasses of SpecScope!")
+                    else throw new IllegalArgumentException("Configured scopes must be either strings or subclasses of SpecScope! \"${it}\" is ${it.class.simpleName}.")
                 }
             }
         }
