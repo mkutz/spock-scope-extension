@@ -29,6 +29,10 @@
         </developer>
     </developers>
 
+    <prerequisites>
+        <maven>2.2.1</maven>
+    </prerequisites>
+
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,7 +43,7 @@
         <dependency>
             <groupId>de.assertagile.spockframework.extensions</groupId>
             <artifactId>spock-scope-extension</artifactId>
-            <version>0.3-SNAPSHOT</version>
+            <version>0.3</version>
             <scope>test</scope>
         </dependency>
 

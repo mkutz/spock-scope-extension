@@ -40,13 +40,16 @@
         </developer>
     </developers>
 
+    <prerequisites>
+        <maven>2.2.1</maven>
+    </prerequisites>
+
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
