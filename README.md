@@ -1,7 +1,7 @@
 Spock Scope Extension
 =====================
 
-[![Build Status](https://travis-ci.org/mkutz/spock-scope-extension.svg?branch=master)](https://travis-ci.org/mkutz/spock-scope-extension) [![Coverage Status](https://img.shields.io/coveralls/mkutz/spock-scope-extension.svg)](https://coveralls.io/r/mkutz/spock-scope-extension) [![Maven Central](https://img.shields.io/maven-central/v/org.apache.maven/apache-maven.svg)](http://search.maven.org/#artifactdetails|de.assertagile.spockframework.extensions|spock-scope-extension|0.3|)
+[![Build Status](https://travis-ci.org/mkutz/spock-scope-extension.svg?branch=master)](https://travis-ci.org/mkutz/spock-scope-extension) [![Coverage Status](https://img.shields.io/coveralls/mkutz/spock-scope-extension.svg)](https://coveralls.io/r/mkutz/spock-scope-extension) [![Maven Central](https://img.shields.io/maven-central/v/de.assertagile.spockframework.extensions/spock-scope-extension.svg)](http://search.maven.org/#artifactdetails|de.assertagile.spockframework.extensions|spock-scope-extension|0.3|)
 
 An extension to mark tests as belonging to a (set of) scopes (e.g. a global feature or a major aspect of the application) for the [Spock Framework](http://spockframework.org/).
 
