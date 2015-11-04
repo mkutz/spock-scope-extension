@@ -1,4 +1,5 @@
 package de.assertagile.spockframework.extensions
+
 import groovy.util.logging.Slf4j
 import org.spockframework.runtime.InvalidSpecException
 import org.spockframework.runtime.extension.IAnnotationDrivenExtension
@@ -8,6 +9,7 @@ import org.spockframework.runtime.model.FieldInfo
 import org.spockframework.runtime.model.ISkippable
 import org.spockframework.runtime.model.MethodInfo
 import org.spockframework.runtime.model.SpecInfo
+
 /**
  * <p>
  * Extension for the <a href="http://spockframework.org">Spock Framework</a> to be able to mark specifications or
@@ -64,25 +66,49 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
         visitSkippable(annotation, feature, feature.name)
     }
 
-
+    /**
+     * Called when a marked fixture method is visited. Will just throw an {@link InvalidSpecException}.
+     *
+     * @param annotation
+     *          the {@link Scope} annotation at the fixture method.
+     * @param fixtureMethod
+     *          the {@link MethodInfo} for the visited fixture method.
+     */
     @Override
     public void visitFixtureAnnotation(Scope annotation, MethodInfo fixtureMethod) {
         throw new InvalidSpecException("@%s may not be applied to fixture methods")
             .withArgs(annotation.annotationType().getSimpleName());
     }
 
+    /**
+     * Called when a marked field is visited. Will just throw an {@link InvalidSpecException}.
+     *
+     * @param annotation
+     *          the {@link Scope} annotation at the field.
+     * @param fixtureMethod
+     *          the {@link FieldInfo} for the visited field.
+     */
     @Override
     public void visitFieldAnnotation(Scope annotation, FieldInfo field) {
         throw new InvalidSpecException("@%s may not be applied to fields")
             .withArgs(annotation.annotationType().getSimpleName());
     }
 
+    /**
+     * Called when this extension is started as {@link IGlobalExtension}.
+     */
     @Override
     void start() {
-        if(isScopedExecution()) log.debug("This is a scoped execution")
+        if (isScopedExecution()) log.debug("This is a scoped execution")
         else log.info("This is an unscoped execution, scopes will be ignored")
     }
 
+    /**
+     * Called when a {@link SpecInfo} is visited by this extension.
+     *
+     * @param spec
+     *          the visited {@link SpecInfo}.
+     */
     @Override
     public void visitSpec(SpecInfo spec) {
         log.debug("Visiting ${spec.name}")
@@ -94,6 +120,9 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
         }
     }
 
+    /**
+     * Called when this extension is stopped as {@link IGlobalExtension}.
+     */
     @Override
     void stop() {
     }

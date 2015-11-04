@@ -1,8 +1,10 @@
 package de.assertagile.spockframework.extensions
 
+import de.assertagile.spockframework.extensions.SpecScopes.A
 import org.spockframework.runtime.model.SpecInfo
 import spock.lang.Specification
 
+@Scope(A)
 class SpockScopeConfigSpec extends Specification {
 
     def "config should be read from SpockScopeConfig.groovy if not mocked"() {
