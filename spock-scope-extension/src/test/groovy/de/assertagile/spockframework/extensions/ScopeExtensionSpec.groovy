@@ -4,7 +4,10 @@ import de.assertagile.spockframework.extensions.SpecScopes.A
 import de.assertagile.spockframework.extensions.SpecScopes.B
 import de.assertagile.spockframework.extensions.SpecScopes.C
 import de.assertagile.spockframework.extensions.SpecScopes.D
+import org.spockframework.runtime.InvalidSpecException
 import org.spockframework.runtime.model.FeatureInfo
+import org.spockframework.runtime.model.FieldInfo
+import org.spockframework.runtime.model.MethodInfo
 import org.spockframework.runtime.model.SpecInfo
 import spock.lang.Specification
 import spock.lang.Subject
@@ -13,6 +16,7 @@ import spock.lang.Unroll
 import static de.assertagile.spockframework.extensions.ScopeExtensionSpec.Skipped.NOT_SKIPPED
 import static de.assertagile.spockframework.extensions.ScopeExtensionSpec.Skipped.SKIPPED
 
+@Scope(A)
 class ScopeExtensionSpec extends Specification {
 
     String originalIncludedScopes = System.getProperty("spock.scopes", "")
@@ -62,6 +66,7 @@ class ScopeExtensionSpec extends Specification {
         [A, B]         | [C, D]         | [C]                 || SKIPPED     // not in scope, multiple scopes
         [A]            | []             | [A, C]              || NOT_SKIPPED // included, multiple test scopes
         []             | [A]            | [A, C]              || SKIPPED     // excluded, multiple test scopes
+        []             | []             | []                  || NOT_SKIPPED // unscoped execution, no scope set
     }
 
     @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #skipped")
@@ -91,6 +96,53 @@ class ScopeExtensionSpec extends Specification {
         ["A", "B"]     | ["C", "D"]     | [C]                 || SKIPPED     // not in scope, multiple scopes
         ["A"]          | []             | [A, C]              || NOT_SKIPPED // included, multiple test scopes
         []             | ["A"]          | [A, C]              || SKIPPED     // excluded, multiple test scopes
+        []             | []             | []                  || NOT_SKIPPED // unscoped execution, no scope set
+    }
+
+    @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, an unscoped Specification Or feature should be #skipped")
+    def "unscoped features should be ignored in scoped executions"(
+        List<Class<? extends SpecScope>> includedScopes, List<Class<? extends SpecScope>> excludedScopes, Skipped skipped) {
+        given:
+        setConfigParameters(includedScopes, excludedScopes)
+
+        and:
+        specInfoMock.getAnnotation(Scope) >> null
+
+        when:
+        scopeExtension.visitSpec(specInfoMock)
+
+        then:
+        (skipped ? 1 : 0) * specInfoMock.setSkipped(true)
+
+        where:
+        includedScopes | excludedScopes || skipped
+        []             | []             || NOT_SKIPPED // unscoped execution
+        ["A"]          | []             || SKIPPED     // scoped execution with included scopes
+        []             | ["A"]          || SKIPPED     // scoped execution with excluded scopes
+        ["A"]          | ["B"]          || SKIPPED     // scoped execution with included and excluded scopes
+    }
+
+    @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, an unscoped Specification Or feature should be #skipped")
+    def "unscoped features should be ignored in scoped executions"(
+        List<String> includedScopes, List<String> excludedScopes, Skipped skipped) {
+        given:
+        setConfigParameters(includedScopes, excludedScopes)
+
+        and:
+        specInfoMock.getAnnotation(Scope) >> null
+
+        when:
+        scopeExtension.visitSpec(specInfoMock)
+
+        then:
+        (skipped ? 1 : 0) * specInfoMock.setSkipped(true)
+
+        where:
+        includedScopes | excludedScopes || skipped
+        []             | []             || NOT_SKIPPED // unscoped execution
+        [A]            | []             || SKIPPED     // scoped execution with included scopes
+        []             | [A]            || SKIPPED     // scoped execution with excluded scopes
+        [A]            | [B]            || SKIPPED     // scoped execution with included and excluded scopes
     }
 
     def "using something else, but Strings or SpecScope subclasses in config should cause an exception"(
@@ -109,6 +161,24 @@ class ScopeExtensionSpec extends Specification {
         includedScopes | excludedScopes
         [new Object()] | []
         []             | [new Object()]
+    }
+
+    def "scoping a fixture method will throw an exception"() {
+        when:
+        scopeExtension.visitFixtureAnnotation(Mock(Scope) { annotationType() >> Scope }, Mock(MethodInfo))
+
+        then:
+        InvalidSpecException e = thrown()
+        e.message == "@Scope may not be applied to fixture methods"
+    }
+
+    def "scoping a field throw will an exception"() {
+        when:
+        scopeExtension.visitFieldAnnotation(Mock(Scope) { annotationType() >> Scope }, Mock(FieldInfo))
+
+        then:
+        InvalidSpecException e = thrown()
+        e.message == "@Scope may not be applied to fields"
     }
 
     def cleanup() {
