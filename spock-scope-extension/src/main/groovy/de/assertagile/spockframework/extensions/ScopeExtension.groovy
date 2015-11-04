@@ -1,11 +1,13 @@
 package de.assertagile.spockframework.extensions
-
 import groovy.util.logging.Slf4j
-import org.spockframework.runtime.extension.AbstractAnnotationDrivenExtension
+import org.spockframework.runtime.InvalidSpecException
+import org.spockframework.runtime.extension.IAnnotationDrivenExtension
+import org.spockframework.runtime.extension.IGlobalExtension
 import org.spockframework.runtime.model.FeatureInfo
+import org.spockframework.runtime.model.FieldInfo
 import org.spockframework.runtime.model.ISkippable
+import org.spockframework.runtime.model.MethodInfo
 import org.spockframework.runtime.model.SpecInfo
-
 /**
  * <p>
  * Extension for the <a href="http://spockframework.org">Spock Framework</a> to be able to mark specifications or
@@ -18,7 +20,7 @@ import org.spockframework.runtime.model.SpecInfo
  * </p>
  */
 @Slf4j
-public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
+public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtension {
 
     /** {@link ConfigObject} for the extension. */
     private ConfigObject config
@@ -43,6 +45,7 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
      * @param spec
      *          the {@link SpecInfo} for the visited specification class.
      */
+    @Override
     public void visitSpecAnnotation(Scope annotation, SpecInfo spec) {
         visitSkippable(annotation, spec, spec.name)
     }
@@ -56,20 +59,55 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
      * @param feature
      *          the {@link FeatureInfo} for the visited feature method.
      */
+    @Override
     public void visitFeatureAnnotation(Scope annotation, FeatureInfo feature) {
         visitSkippable(annotation, feature, feature.name)
+    }
+
+
+    @Override
+    public void visitFixtureAnnotation(Scope annotation, MethodInfo fixtureMethod) {
+        throw new InvalidSpecException("@%s may not be applied to fixture methods")
+            .withArgs(annotation.annotationType().getSimpleName());
+    }
+
+    @Override
+    public void visitFieldAnnotation(Scope annotation, FieldInfo field) {
+        throw new InvalidSpecException("@%s may not be applied to fields")
+            .withArgs(annotation.annotationType().getSimpleName());
+    }
+
+    @Override
+    void start() {
+        if(isScopedExecution()) log.debug("This is a scoped execution")
+        else log.info("This is an unscoped execution, scopes will be ignored")
+    }
+
+    @Override
+    public void visitSpec(SpecInfo spec) {
+        log.debug("Visiting ${spec.name}")
+        if (!spec.getAnnotation(Scope) && isScopedExecution()) {
+            log.info("Skipping \"${spec.name}\" for it is not scoped and this is a scoped run")
+            spec.setSkipped(true)
+        } else {
+            log.debug("Not skipping \"${spec.name}\" due to scoped run")
+        }
+    }
+
+    @Override
+    void stop() {
     }
 
     private void visitSkippable(Scope annotation, ISkippable skippable, String name) {
         if (!isInIncludedScopes(annotation) || isInExcludedScopes(annotation)) {
             if (!isInIncludedScopes(annotation)) {
-                log.info("Skipping \"${name}\" for its scope ${annotation.value()} is not in included scope (${includedScopes})")
+                log.info("Skipping \"${name}\" for its scope ${annotation.value()*.simpleName} is not in included scope (${includedScopes})")
             } else if (isInExcludedScopes(annotation)) {
-                log.info("Skipping \"${name}\" for its scope ${annotation.value()} is in excluded scope (${excludedScopes})")
+                log.info("Skipping \"${name}\" for its scope ${annotation.value()*.simpleName} is in excluded scope (${excludedScopes})")
             }
             skippable.setSkipped(true)
         }
-        log.debug("Executing ${name} for its scope ${annotation.value()} is in included scope (${includedScopes}) and not in excluded scope (${excludedScopes})")
+        log.debug("Executing \"${name}\" for its scope ${annotation.value()*.simpleName} is in included scope (${includedScopes}) and not in excluded scope (${excludedScopes})")
     }
 
     private ConfigObject getConfig() {
@@ -120,5 +158,9 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
         if (!getExcludedScopes()) return false
         List<Class<? extends SpecScope>> specOrFeatureScopes = annotation.value() ?: []
         return !getExcludedScopes().disjoint(specOrFeatureScopes*.simpleName)
+    }
+
+    private isScopedExecution() {
+        this.getExcludedScopes() || this.getIncludedScopes()
     }
 }
