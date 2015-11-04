@@ -71,7 +71,7 @@ class ScopeExtensionSpec extends Specification {
 
     @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #skipped")
     def "only tests in included scopes should be executed, while tests in excluded scopes should always be skipped"(
-        List<String> includedScopes, List<String> excludedScopes, List<String> specOrFeatureScopes, Skipped skipped) {
+        Set<String> includedScopes, Set<String> excludedScopes, Set<String> specOrFeatureScopes, Skipped skipped) {
         given:
         setConfigParameters(includedScopes, excludedScopes)
 
@@ -100,7 +100,30 @@ class ScopeExtensionSpec extends Specification {
     }
 
     @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, an unscoped Specification Or feature should be #skipped")
-    def "unscoped features should be ignored in scoped executions"(
+    def "unscoped features should be ignored in executions scoped via system parameters"(
+        Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes, Skipped skipped) {
+        given:
+        setSystemParameters(includedScopes, excludedScopes)
+
+        and:
+        specInfoMock.getAnnotation(Scope) >> null
+
+        when:
+        scopeExtension.visitSpec(specInfoMock)
+
+        then:
+        (skipped ? 1 : 0) * specInfoMock.setSkipped(true)
+
+        where:
+        includedScopes | excludedScopes || skipped
+        []             | []             || NOT_SKIPPED // unscoped execution
+        [A]            | []             || SKIPPED     // scoped execution with included scopes
+        []             | [A]            || SKIPPED     // scoped execution with excluded scopes
+        [A]            | [B]            || SKIPPED     // scoped execution with included and excluded scopes
+    }
+
+    @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, an unscoped Specification Or feature should be #skipped")
+    def "unscoped features should be ignored in executions scoped via config"(
         List<Class<? extends SpecScope>> includedScopes, List<Class<? extends SpecScope>> excludedScopes, Skipped skipped) {
         given:
         setConfigParameters(includedScopes, excludedScopes)
@@ -120,29 +143,6 @@ class ScopeExtensionSpec extends Specification {
         ["A"]          | []             || SKIPPED     // scoped execution with included scopes
         []             | ["A"]          || SKIPPED     // scoped execution with excluded scopes
         ["A"]          | ["B"]          || SKIPPED     // scoped execution with included and excluded scopes
-    }
-
-    @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, an unscoped Specification Or feature should be #skipped")
-    def "unscoped features should be ignored in scoped executions"(
-        List<String> includedScopes, List<String> excludedScopes, Skipped skipped) {
-        given:
-        setConfigParameters(includedScopes, excludedScopes)
-
-        and:
-        specInfoMock.getAnnotation(Scope) >> null
-
-        when:
-        scopeExtension.visitSpec(specInfoMock)
-
-        then:
-        (skipped ? 1 : 0) * specInfoMock.setSkipped(true)
-
-        where:
-        includedScopes | excludedScopes || skipped
-        []             | []             || NOT_SKIPPED // unscoped execution
-        [A]            | []             || SKIPPED     // scoped execution with included scopes
-        []             | [A]            || SKIPPED     // scoped execution with excluded scopes
-        [A]            | [B]            || SKIPPED     // scoped execution with included and excluded scopes
     }
 
     def "using something else, but Strings or SpecScope subclasses in config should cause an exception"(
