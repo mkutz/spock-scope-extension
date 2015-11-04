@@ -112,12 +112,17 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
     @Override
     public void visitSpec(SpecInfo spec) {
         log.debug("Visiting ${spec.name}")
-        if (!spec.getAnnotation(Scope) && isScopedExecution()) {
-            log.info("Skipping \"${spec.name}\" for it is not scoped and this is a scoped run")
-            //visitSkippable(null, spec, spec.name)
-            spec.setSkipped(true)
-        } else {
-            log.debug("Not skipping \"${spec.name}\" due to scoped run")
+        if (isScopedExecution() && !spec.getAnnotation(Scope)) {
+            List<FeatureInfo> unscopedFeatures = spec.allFeatures.findAll { !it.featureMethod.getAnnotation(Scope) }
+            if (unscopedFeatures == spec.allFeatures) {
+                log.info("Skipping \"${spec.name}\" for it is not scoped and this is a scoped run")
+                spec.setSkipped(true)
+            } else {
+                unscopedFeatures.each { FeatureInfo feature ->
+                    log.info("Skipping \"${feature.name}\" for it is not scoped and this is a scoped run")
+                    feature.setSkipped(true)
+                }
+            }
         }
     }
 
@@ -190,7 +195,7 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
         return !getExcludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }
 
-    private isScopedExecution() {
+    private boolean isScopedExecution() {
         this.getExcludedScopes() || this.getIncludedScopes()
     }
 }

@@ -39,7 +39,7 @@ class ScopeExtensionSpec extends Specification {
     SpecInfo specInfoMock = Mock() { getName() >> "MockedSpec" }
 
     @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #skipped")
-    def "only tests in included scopes should be executed, while tests in excluded scopes should always be skipped"(
+    def "only tests in included scopes should be executed, while tests in excluded scopes should always be skipped in executions scoped via system parameters"(
         Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes, Set<Class<? extends SpecScope>> specOrFeatureScopes, Skipped skipped) {
         given:
         setSystemParameters(includedScopes, excludedScopes)
@@ -70,7 +70,7 @@ class ScopeExtensionSpec extends Specification {
     }
 
     @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #skipped")
-    def "only tests in included scopes should be executed, while tests in excluded scopes should always be skipped"(
+    def "only tests in included scopes should be executed, while tests in excluded scopes should always be skipped in executions scoped via config parameters"(
         Set<String> includedScopes, Set<String> excludedScopes, Set<String> specOrFeatureScopes, Skipped skipped) {
         given:
         setConfigParameters(includedScopes, excludedScopes)
@@ -107,6 +107,8 @@ class ScopeExtensionSpec extends Specification {
 
         and:
         specInfoMock.getAnnotation(Scope) >> null
+        FeatureInfo unscopedFeatureInfoMock = Mock() { getFeatureMethod() >> Mock(MethodInfo) { getAnnotation(Scope) >> null }}
+        specInfoMock.getAllFeatures() >> [unscopedFeatureInfoMock]
 
         when:
         scopeExtension.visitSpec(specInfoMock)
@@ -123,13 +125,15 @@ class ScopeExtensionSpec extends Specification {
     }
 
     @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, an unscoped Specification Or feature should be #skipped")
-    def "unscoped features should be ignored in executions scoped via config"(
+    def "unscoped Specifications should be ignored in executions scoped via config"(
         List<Class<? extends SpecScope>> includedScopes, List<Class<? extends SpecScope>> excludedScopes, Skipped skipped) {
         given:
         setConfigParameters(includedScopes, excludedScopes)
 
         and:
         specInfoMock.getAnnotation(Scope) >> null
+        FeatureInfo unscopedFeatureInfoMock = Mock() { getFeatureMethod() >> Mock(MethodInfo) { getAnnotation(Scope) >> null }}
+        specInfoMock.getAllFeatures() >> [unscopedFeatureInfoMock]
 
         when:
         scopeExtension.visitSpec(specInfoMock)
@@ -143,6 +147,25 @@ class ScopeExtensionSpec extends Specification {
         ["A"]          | []             || SKIPPED     // scoped execution with included scopes
         []             | ["A"]          || SKIPPED     // scoped execution with excluded scopes
         ["A"]          | ["B"]          || SKIPPED     // scoped execution with included and excluded scopes
+    }
+
+    def "an unscoped Specification with scoped features should not be ignored"() {
+        given:
+        setConfigParameters([A], [B])
+
+        and:
+        specInfoMock.getAnnotation(Scope) >> null
+        FeatureInfo unscopedFeatureInfoMock = Mock() { getFeatureMethod() >> Mock(MethodInfo) { getAnnotation(Scope) >> null }}
+        FeatureInfo scopedFeatureInfoMock = Mock() { getFeatureMethod() >> Mock(MethodInfo) { getAnnotation(Scope) >> Mock(Scope) }}
+        specInfoMock.getAllFeatures() >> [unscopedFeatureInfoMock, scopedFeatureInfoMock]
+
+        when:
+        scopeExtension.visitSpec(specInfoMock)
+
+        then:
+        0 * specInfoMock.setSkipped(true)
+        1 * unscopedFeatureInfoMock.setSkipped(true)
+        0 * scopedFeatureInfoMock.setSkipped(true)
     }
 
     def "using something else, but Strings or SpecScope subclasses in config should cause an exception"(
