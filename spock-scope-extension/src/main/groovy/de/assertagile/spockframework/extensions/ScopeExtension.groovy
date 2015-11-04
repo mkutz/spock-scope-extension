@@ -3,6 +3,7 @@ package de.assertagile.spockframework.extensions
 import groovy.util.logging.Slf4j
 import org.spockframework.runtime.extension.AbstractAnnotationDrivenExtension
 import org.spockframework.runtime.model.FeatureInfo
+import org.spockframework.runtime.model.ISkippable
 import org.spockframework.runtime.model.SpecInfo
 
 /**
@@ -43,11 +44,7 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
      *          the {@link SpecInfo} for the visited specification class.
      */
     public void visitSpecAnnotation(Scope annotation, SpecInfo spec) {
-        if (!isInIncludedScopes(annotation) || isInExcludedScopes(annotation)) {
-            log.info("Skipping ${spec.name} for its scope ${annotation.value()} is not in included scope (${includedScopes}) or is in excluded scope (${excludedScopes})")
-            spec.setSkipped(true)
-        }
-        log.debug("Executing ${spec.name} for its scope ${annotation.value()} is in included scope (${includedScopes}) and not in excluded scope (${excludedScopes})")
+        visitSkippable(annotation, spec, spec.name)
     }
 
     /**
@@ -60,11 +57,19 @@ public class ScopeExtension extends AbstractAnnotationDrivenExtension<Scope> {
      *          the {@link FeatureInfo} for the visited feature method.
      */
     public void visitFeatureAnnotation(Scope annotation, FeatureInfo feature) {
+        visitSkippable(annotation, feature, feature.name)
+    }
+
+    private void visitSkippable(Scope annotation, ISkippable skippable, String name) {
         if (!isInIncludedScopes(annotation) || isInExcludedScopes(annotation)) {
-            log.info("Skipping ${feature.name} for its scope ${annotation.value()} is not in included scope (${includedScopes}) or is in excluded scope (${excludedScopes})")
-            feature.setSkipped(true)
+            if (!isInIncludedScopes(annotation)) {
+                log.info("Skipping \"${name}\" for its scope ${annotation.value()} is not in included scope (${includedScopes})")
+            } else if (isInExcludedScopes(annotation)) {
+                log.info("Skipping \"${name}\" for its scope ${annotation.value()} is in excluded scope (${excludedScopes})")
+            }
+            skippable.setSkipped(true)
         }
-        log.debug("Executing ${feature.name} for its scope ${annotation.value()} is in included scope (${includedScopes}) and not in excluded scope (${excludedScopes})")
+        log.debug("Executing ${name} for its scope ${annotation.value()} is in included scope (${includedScopes}) and not in excluded scope (${excludedScopes})")
     }
 
     private ConfigObject getConfig() {

@@ -10,6 +10,9 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Unroll
 
+import static de.assertagile.spockframework.extensions.ScopeExtensionSpec.Skipped.NOT_SKIPPED
+import static de.assertagile.spockframework.extensions.ScopeExtensionSpec.Skipped.SKIPPED
+
 class ScopeExtensionSpec extends Specification {
 
     String originalIncludedScopes = System.getProperty("spock.scopes", "")
@@ -50,15 +53,15 @@ class ScopeExtensionSpec extends Specification {
 
         where:
         includedScopes | excludedScopes | specOrFeatureScopes || skipped
-        []             | []             | []                  || Skipped.NOT_SKIPPED // execution not scoped
-        [A]            | []             | [A]                 || Skipped.NOT_SKIPPED // in scope
-        [A]            | []             | []                  || Skipped.SKIPPED     // not in scope
-        [A]            | [A]            | [A]                 || Skipped.SKIPPED     // excluded and included
-        [A]            | [A]            | []                  || Skipped.SKIPPED     // empty scope, scoped execution
-        [A, B]         | [C, D]         | [A]                 || Skipped.NOT_SKIPPED // in scope, multiple scopes
-        [A, B]         | [C, D]         | [C]                 || Skipped.SKIPPED     // not in scope, multiple scopes
-        [A]            | []             | [A, C]              || Skipped.NOT_SKIPPED // included, multiple test scopes
-        []             | [A]            | [A, C]              || Skipped.SKIPPED     // excluded, multiple test scopes
+        []             | []             | []                  || NOT_SKIPPED // execution not scoped
+        [A]            | []             | [A]                 || NOT_SKIPPED // in scope
+        [A]            | []             | []                  || SKIPPED     // not in scope
+        [A]            | [A]            | [A]                 || SKIPPED     // excluded and included
+        [A]            | [A]            | []                  || SKIPPED     // empty scope, scoped execution
+        [A, B]         | [C, D]         | [A]                 || NOT_SKIPPED // in scope, multiple scopes
+        [A, B]         | [C, D]         | [C]                 || SKIPPED     // not in scope, multiple scopes
+        [A]            | []             | [A, C]              || NOT_SKIPPED // included, multiple test scopes
+        []             | [A]            | [A, C]              || SKIPPED     // excluded, multiple test scopes
     }
 
     @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #skipped")
@@ -80,14 +83,14 @@ class ScopeExtensionSpec extends Specification {
 
         where:
         includedScopes | excludedScopes | specOrFeatureScopes || skipped
-        ["A"]          | []             | [A]                 || Skipped.NOT_SKIPPED // in scope
-        ["A"]          | []             | []                  || Skipped.SKIPPED     // not in scope
-        ["A"]          | ["A"]          | [A]                 || Skipped.SKIPPED     // excluded and included
-        ["A"]          | ["A"]          | []                  || Skipped.SKIPPED     // empty scope, scoped execution
-        ["A", "B"]     | ["C", "D"]     | [A]                 || Skipped.NOT_SKIPPED // in scope, multiple scopes
-        ["A", "B"]     | ["C", "D"]     | [C]                 || Skipped.SKIPPED     // not in scope, multiple scopes
-        ["A"]          | []             | [A, C]              || Skipped.NOT_SKIPPED // included, multiple test scopes
-        []             | ["A"]          | [A, C]              || Skipped.SKIPPED     // excluded, multiple test scopes
+        ["A"]          | []             | [A]                 || NOT_SKIPPED // in scope
+        ["A"]          | []             | []                  || SKIPPED     // not in scope
+        ["A"]          | ["A"]          | [A]                 || SKIPPED     // excluded and included
+        ["A"]          | ["A"]          | []                  || SKIPPED     // empty scope, scoped execution
+        ["A", "B"]     | ["C", "D"]     | [A]                 || NOT_SKIPPED // in scope, multiple scopes
+        ["A", "B"]     | ["C", "D"]     | [C]                 || SKIPPED     // not in scope, multiple scopes
+        ["A"]          | []             | [A, C]              || NOT_SKIPPED // included, multiple test scopes
+        []             | ["A"]          | [A, C]              || SKIPPED     // excluded, multiple test scopes
     }
 
     def "using something else, but Strings or SpecScope subclasses in config should cause an exception"(
