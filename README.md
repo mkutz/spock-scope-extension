@@ -37,10 +37,3 @@ excludedScopes = [FeatureB]
 Note that if neither `includedScopes` nor `excludedScopes` is configured and neither `-Dspock.scopes=…` nor `-Dspock.excludedScopes=…` are set the extension will not ignore any test.
 
 Also note that the `-Dspock.scopes=…` and `-Dspock.excludedScopes=…` parameters will always replace the configuration in `SpockScopeConfig.groovy` if given.
-
-Planned Features for next Version
----------------------------------
-
-* ~~Parameter and configuration for excluded scopes `-Dspock.excludedScopes`~~ added since 0.2
-* ~~Allow scopes to be classes instead of strings for using non-inline constants in annotations cause issues in strict compilers (for instance visiblie in Eclipse IDE)~~ added since 0.3, replaced Strings
-* Implicit scopes: spec name, package, …
