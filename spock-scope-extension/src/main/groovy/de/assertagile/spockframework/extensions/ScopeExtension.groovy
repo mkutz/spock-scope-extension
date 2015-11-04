@@ -114,6 +114,7 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
         log.debug("Visiting ${spec.name}")
         if (!spec.getAnnotation(Scope) && isScopedExecution()) {
             log.info("Skipping \"${spec.name}\" for it is not scoped and this is a scoped run")
+            //visitSkippable(null, spec, spec.name)
             spec.setSkipped(true)
         } else {
             log.debug("Not skipping \"${spec.name}\" due to scoped run")
@@ -130,13 +131,13 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
     private void visitSkippable(Scope annotation, ISkippable skippable, String name) {
         if (!isInIncludedScopes(annotation) || isInExcludedScopes(annotation)) {
             if (!isInIncludedScopes(annotation)) {
-                log.info("Skipping \"${name}\" for its scope ${annotation.value()*.simpleName} is not in included scope (${includedScopes})")
+                log.info("Skipping \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is not in included scope (${includedScopes})")
             } else if (isInExcludedScopes(annotation)) {
-                log.info("Skipping \"${name}\" for its scope ${annotation.value()*.simpleName} is in excluded scope (${excludedScopes})")
+                log.info("Skipping \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is in excluded scope (${excludedScopes})")
             }
             skippable.setSkipped(true)
         }
-        log.debug("Executing \"${name}\" for its scope ${annotation.value()*.simpleName} is in included scope (${includedScopes}) and not in excluded scope (${excludedScopes})")
+        log.debug("Executing \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is in included scope (${includedScopes}) and not in excluded scope (${excludedScopes})")
     }
 
     private ConfigObject getConfig() {
@@ -179,13 +180,13 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
 
     private isInIncludedScopes(Scope annotation) {
         if (!getIncludedScopes()) return true
-        List<Class<? extends SpecScope>> specOrFeatureScopes = annotation.value() ?: []
+        List<Class<? extends SpecScope>> specOrFeatureScopes = annotation?.value() ?: []
         return !getIncludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }
 
     private isInExcludedScopes(Scope annotation) {
         if (!getExcludedScopes()) return false
-        List<Class<? extends SpecScope>> specOrFeatureScopes = annotation.value() ?: []
+        List<Class<? extends SpecScope>> specOrFeatureScopes = annotation?.value() ?: []
         return !getExcludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }
 
