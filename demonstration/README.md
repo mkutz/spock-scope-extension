@@ -75,9 +75,13 @@ mvn test -Dspock.scopes="FeatureC" -Dtest=UnscopedSpec
 ```
 will ignore the entire `Specification` just like it was scoped to an unselected scope.
 
-If will only be executed if you don't set any scope:
+It will only be executed if you don't set any scope:
 ```
 mvn test -Dtest=UnscopedSpec
+```
+or if you explicitly include unscoped using the pseudo scope `UNSCOPED`:
+```
+mvn test -Dspock.scopes="UNSCOPED" -Dtest=UnscopedSpec
 ```
 
 Excluding Scopes
