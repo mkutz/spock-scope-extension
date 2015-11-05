@@ -4,7 +4,7 @@
 
     <groupId>de.assertagile.spockframework.extensions</groupId>
     <artifactId>spock-scope-extension</artifactId>
-    <version>0.4-SNAPSHOT</version>
+    <version>0.4</version>
 
     <name>Spock Scope Extension</name>
     <description>An extension to mark tests as belonging to a (set of) scopes (e.g. a global
@@ -24,7 +24,7 @@
         <connection>scm:git:git://github.com/mkutz/spock-scope-extension.git</connection>
         <developerConnection>scm:git:git@github.com:mkutz/spock-scope-extension.git</developerConnection>
         <url>https://github.com/mkutz/spock-scope-extension</url>
-        <tag>HEAD</tag>
+        <tag>spock-scope-extension-0.4</tag>
     </scm>
 
     <developers>
