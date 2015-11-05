@@ -24,9 +24,13 @@ For instance in your pom.xml:
 </dependency>
 ```
 
-Now you can mark your `Specification`s with the `@Scope(…)` annotation with one or more subclasses of `SpecScope` representing scopes.
+Now you can mark your `Specification`s or their feature methods with the `@Scope(…)` annotation with one or more subclasses of `SpecScope` representing scopes.
 
-When you execute your tests you can pass `-Dspock.scopes=…` to your test execution, all tests that are not annotated with at least one of the given scopes, it will be ignored. Since version 0.2 you can as well pass `-Dspock.excludedScopes=…` to ignore all tests that have at least one of the given scopes.
+When you execute your tests you can pass `-Dspock.scopes=…` to your test execution, all tests that are not annotated with at least one of the given scopes, it will be ignored.
+
+You can as well pass `-Dspock.excludedScopes=…` to ignore all tests that have at least one of the given scopes (since 0.3).
+
+Note that all unscoped `Specification` and feature methods will be ignored when you set scopes (included or exclued). If you want to include unscoped tests, you can use the pseudo scope `UNSCOPED` (since 0.4).
 
 To ease usage in IDE's you can as well create a `SpockScopeConfig.groovy` to your projects resources and add a list of `includedScopes` and `excludedScopes` instead of the `-Dspock.scopes=…` and `-Dspock.excludedScopes=…` parameters:
 ```groovy
