@@ -1,5 +1,4 @@
 package de.assertagile.spockframework.extensions
-
 import groovy.util.logging.Slf4j
 import org.spockframework.runtime.InvalidSpecException
 import org.spockframework.runtime.extension.IAnnotationDrivenExtension
@@ -9,7 +8,6 @@ import org.spockframework.runtime.model.FieldInfo
 import org.spockframework.runtime.model.ISkippable
 import org.spockframework.runtime.model.MethodInfo
 import org.spockframework.runtime.model.SpecInfo
-
 /**
  * <p>
  * Extension for the <a href="http://spockframework.org">Spock Framework</a> to be able to mark specifications or
@@ -155,32 +153,30 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
 
     private Set<String> getIncludedScopes() {
         if (includedScopes == null) {
-            if (System.getProperty("spock.scopes")) {
-                includedScopes = System.getProperty("spock.scopes")?.split(/\s*,\s*/)
-            } else {
-                includedScopes = (getConfig().get("includedScopes") ?: []).collect {
-                    if (it instanceof Class<? extends SpecScope>) return it.simpleName
-                    else if (it instanceof String) return it
-                    else throw new IllegalArgumentException("Configured scopes must be either strings or subclasses of SpecScope! \"${it}\" is ${it.class.simpleName}.")
-                }
-            }
+            includedScopes = getScopes(Parameter.INCLUDED)
         }
         return includedScopes
     }
 
     private Set<String> getExcludedScopes() {
         if (excludedScopes == null) {
-            if (System.getProperty("spock.excludedScopes")) {
-                excludedScopes = System.getProperty("spock.excludedScopes")?.split(/\s*,\s*/)
-            } else {
-                excludedScopes = (getConfig().get("excludedScopes") ?: []).collect {
-                    if (it instanceof Class<? extends SpecScope>) return it.simpleName
-                    else if (it instanceof String) return it
-                    else throw new IllegalArgumentException("Configured scopes must be either strings or subclasses of SpecScope! \"${it}\" is ${it.class.simpleName}.")
-                }
-            }
+            excludedScopes = getScopes(Parameter.EXCLUDED)
         }
         return excludedScopes
+    }
+
+    private Set<String> getScopes(Parameter which) {
+        Set<String> scopes
+        if (System.getProperty(which.systemProperty)) {
+            scopes = System.getProperty(which.systemProperty)?.split(/\s*,\s*/)
+        } else {
+            scopes = (getConfig().get((which.configParameter) ?: [])).collect {
+                if (it instanceof Class<? extends SpecScope>) return it.simpleName
+                else if (it instanceof String) return it
+                else throw new IllegalArgumentException("Configured scopes must be either strings or subclasses of SpecScope! \"${it}\" is ${it.class.simpleName}.")
+            }
+        }
+        return scopes
     }
 
     private isInIncludedScopes(Scope annotation) {
@@ -197,5 +193,18 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
 
     private boolean isScopedExecution() {
         this.getExcludedScopes() || this.getIncludedScopes()
+    }
+
+    private enum Parameter {
+        INCLUDED("spock.scopes", "includedScopes"),
+        EXCLUDED("spock.excludedScopes", "excludedScopes")
+
+        public final String systemProperty
+        public final String configParameter
+
+        private Parameter(String systemProperty, String configParameter) {
+            this.configParameter = configParameter
+            this.systemProperty = systemProperty
+        }
     }
 }
