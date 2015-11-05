@@ -102,7 +102,9 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
     }
 
     /**
-     * Called when a {@link SpecInfo} is visited by this extension.
+     * Called when a {@link SpecInfo} is visited by this extension. Generally only handling unscoped
+     * {@link spock.lang.Specification}s and feature methods. Everything else is handled by
+     * {@link #visitSpecAnnotation} and {@link #visitFeatureAnnotation}.
      *
      * @param spec
      *          the visited {@link SpecInfo}.
@@ -110,7 +112,7 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
     @Override
     public void visitSpec(SpecInfo spec) {
         log.debug("Visiting ${spec.name}")
-        if (isScopedExecution() && !spec.getAnnotation(Scope)) {
+        if (!isUnscopedIncluded() && isScopedExecution() && !spec.getAnnotation(Scope)) {
             List<FeatureInfo> unscopedFeatures = spec.allFeatures.findAll { !it.featureMethod.getAnnotation(Scope) }
             if (unscopedFeatures == spec.allFeatures) {
                 log.info("Skipping \"${spec.name}\" for it is not scoped and this is a scoped run")
@@ -179,16 +181,23 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
         return scopes
     }
 
-    private isInIncludedScopes(Scope annotation) {
+    private boolean isInIncludedScopes(Scope annotation) {
         if (!getIncludedScopes()) return true
         List<Class<? extends SpecScope>> specOrFeatureScopes = annotation?.value() ?: []
+        if (!specOrFeatureScopes && isUnscopedIncluded()) return true
         return !getIncludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }
 
-    private isInExcludedScopes(Scope annotation) {
+    private boolean isInExcludedScopes(Scope annotation) {
         if (!getExcludedScopes()) return false
         List<Class<? extends SpecScope>> specOrFeatureScopes = annotation?.value() ?: []
+        if (!specOrFeatureScopes && !isUnscopedIncluded()) return true
         return !getExcludedScopes().disjoint(specOrFeatureScopes*.simpleName)
+    }
+
+    private boolean isUnscopedIncluded() {
+        getIncludedScopes().contains(PseudoScope.UNSCOPED.parameterValue) &&
+            !getExcludedScopes().contains(PseudoScope.UNSCOPED.parameterValue)
     }
 
     private boolean isScopedExecution() {
@@ -199,12 +208,22 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
         INCLUDED("spock.scopes", "includedScopes"),
         EXCLUDED("spock.excludedScopes", "excludedScopes")
 
-        public final String systemProperty
-        public final String configParameter
+        final String systemProperty
+        final String configParameter
 
         private Parameter(String systemProperty, String configParameter) {
             this.configParameter = configParameter
             this.systemProperty = systemProperty
+        }
+    }
+
+    private enum PseudoScope {
+        UNSCOPED("UNSCOPED")
+
+        final String parameterValue
+
+        private PseudoScope(String parameterValue) {
+            this.parameterValue = parameterValue
         }
     }
 }

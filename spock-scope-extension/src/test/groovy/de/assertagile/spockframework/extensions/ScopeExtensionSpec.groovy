@@ -88,15 +88,17 @@ class ScopeExtensionSpec extends Specification {
 
         where:
         includedScopes | excludedScopes | specOrFeatureScopes || skipped
-        ["A"]          | []             | [A]                 || NOT_SKIPPED // in scope
-        ["A"]          | []             | []                  || SKIPPED     // not in scope
-        ["A"]          | ["A"]          | [A]                 || SKIPPED     // excluded and included
-        ["A"]          | ["A"]          | []                  || SKIPPED     // empty scope, scoped execution
-        ["A", "B"]     | ["C", "D"]     | [A]                 || NOT_SKIPPED // in scope, multiple scopes
-        ["A", "B"]     | ["C", "D"]     | [C]                 || SKIPPED     // not in scope, multiple scopes
-        ["A"]          | []             | [A, C]              || NOT_SKIPPED // included, multiple test scopes
-        []             | ["A"]          | [A, C]              || SKIPPED     // excluded, multiple test scopes
-        []             | []             | []                  || NOT_SKIPPED // unscoped execution, no scope set
+//        ["A"]          | []             | [A]                 || NOT_SKIPPED // in scope
+//        ["A"]          | []             | []                  || SKIPPED     // not in scope
+//        ["A"]          | ["A"]          | [A]                 || SKIPPED     // excluded and included
+//        ["A"]          | ["A"]          | []                  || SKIPPED     // empty scope, scoped execution
+//        ["A", "B"]     | ["C", "D"]     | [A]                 || NOT_SKIPPED // in scope, multiple scopes
+//        ["A", "B"]     | ["C", "D"]     | [C]                 || SKIPPED     // not in scope, multiple scopes
+//        ["A"]          | []             | [A, C]              || NOT_SKIPPED // included, multiple test scopes
+//        []             | ["A"]          | [A, C]              || SKIPPED     // excluded, multiple test scopes
+//        []             | []             | []                  || NOT_SKIPPED // unscoped execution, no scope set
+//        ["UNSCOPED"]   | []             | []                  || NOT_SKIPPED // unscoped included, unscoped spec
+        []             | ["UNSCOPED"]   | []                  || SKIPPED     // unscoped excluded, unscoped spec
     }
 
     @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, an unscoped Specification Or feature should be #skipped")
@@ -147,6 +149,8 @@ class ScopeExtensionSpec extends Specification {
         ["A"]          | []             || SKIPPED     // scoped execution with included scopes
         []             | ["A"]          || SKIPPED     // scoped execution with excluded scopes
         ["A"]          | ["B"]          || SKIPPED     // scoped execution with included and excluded scopes
+        ["UNSCOPED"]   | []             || NOT_SKIPPED // unscoped included
+        []             | ["UNSCOPED"]   || SKIPPED     // unscoped excluded
     }
 
     def "an unscoped Specification with scoped features should not be ignored"() {
