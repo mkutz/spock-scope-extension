@@ -1,13 +1,15 @@
 package de.assertagile.spockframework.extensions
+
 import groovy.util.logging.Slf4j
 import org.spockframework.runtime.InvalidSpecException
 import org.spockframework.runtime.extension.IAnnotationDrivenExtension
 import org.spockframework.runtime.extension.IGlobalExtension
 import org.spockframework.runtime.model.FeatureInfo
 import org.spockframework.runtime.model.FieldInfo
-import org.spockframework.runtime.model.ISkippable
+import org.spockframework.runtime.model.IExcludable
 import org.spockframework.runtime.model.MethodInfo
 import org.spockframework.runtime.model.SpecInfo
+
 /**
  * <p>
  * Extension for the <a href="http://spockframework.org">Spock Framework</a> to be able to mark specifications or
@@ -47,7 +49,7 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
      */
     @Override
     public void visitSpecAnnotation(Scope annotation, SpecInfo spec) {
-        visitSkippable(annotation, spec, spec.name)
+        visitExcludable(annotation, spec, spec.name)
     }
 
     /**
@@ -61,7 +63,7 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
      */
     @Override
     public void visitFeatureAnnotation(Scope annotation, FeatureInfo feature) {
-        visitSkippable(annotation, feature, feature.name)
+        visitExcludable(annotation, feature, feature.name)
     }
 
     /**
@@ -115,12 +117,12 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
         if (!isUnscopedIncluded() && isScopedExecution() && !spec.getAnnotation(Scope)) {
             List<FeatureInfo> unscopedFeatures = spec.allFeatures.findAll { !it.featureMethod.getAnnotation(Scope) }
             if (unscopedFeatures == spec.allFeatures) {
-                log.info("Skipping \"${spec.name}\" for it is not scoped and this is a scoped run")
-                spec.setSkipped(true)
+                log.info("Excluding \"${spec.name}\" for it is not scoped and this is a scoped run")
+                spec.setExcluded(true)
             } else {
                 unscopedFeatures.each { FeatureInfo feature ->
-                    log.info("Skipping \"${feature.name}\" for it is not scoped and this is a scoped run")
-                    feature.setSkipped(true)
+                    log.info("Excluding \"${feature.name}\" for it is not scoped and this is a scoped run")
+                    feature.setExcluded(true)
                 }
             }
         }
@@ -133,14 +135,14 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
     void stop() {
     }
 
-    private void visitSkippable(Scope annotation, ISkippable skippable, String name) {
+    private void visitExcludable(Scope annotation, IExcludable excludable, String name) {
         if (!isInIncludedScopes(annotation) || isInExcludedScopes(annotation)) {
             if (!isInIncludedScopes(annotation)) {
-                log.info("Skipping \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is not in included scope (${includedScopes})")
+                log.info("Excluding \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is not in included scope (${includedScopes})")
             } else if (isInExcludedScopes(annotation)) {
-                log.info("Skipping \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is in excluded scope (${excludedScopes})")
+                log.info("Excluding \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is in excluded scope (${excludedScopes})")
             }
-            skippable.setSkipped(true)
+            excludable.setExcluded(true)
         }
         log.debug("Executing \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is in included scope (${includedScopes}) and not in excluded scope (${excludedScopes})")
     }

@@ -21,7 +21,7 @@ class SpockScopeConfigSpec extends Specification {
         scopeExtension.visitSpecAnnotation(scopeB, scopeBSpecInfoMock)
 
         then:
-        0 * scopeASpecInfoMock.setSkipped(true)
-        1 * scopeBSpecInfoMock.setSkipped(true)
+        0 * scopeASpecInfoMock.setExcluded(true)
+        1 * scopeBSpecInfoMock.setExcluded(true)
     }
 }
