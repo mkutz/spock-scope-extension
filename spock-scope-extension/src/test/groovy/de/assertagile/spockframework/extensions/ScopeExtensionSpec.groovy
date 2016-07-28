@@ -13,8 +13,8 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Unroll
 
-import static de.assertagile.spockframework.extensions.ScopeExtensionSpec.Skipped.NOT_SKIPPED
-import static de.assertagile.spockframework.extensions.ScopeExtensionSpec.Skipped.SKIPPED
+import static de.assertagile.spockframework.extensions.ScopeExtensionSpec.Excluded.NOT_EXCLUDED
+import static de.assertagile.spockframework.extensions.ScopeExtensionSpec.Excluded.EXCLUDED
 
 @Scope(A)
 class ScopeExtensionSpec extends Specification {
@@ -24,10 +24,10 @@ class ScopeExtensionSpec extends Specification {
 
     ConfigObject configMock = Mock()
 
-    enum Skipped {
-        SKIPPED, NOT_SKIPPED
+    enum Excluded {
+        EXCLUDED, NOT_EXCLUDED
 
-        public boolean asBoolean() { this == SKIPPED }
+        public boolean asBoolean() { this == EXCLUDED }
 
         public String toString() { super.toString().toLowerCase().replace("_", " ") }
     }
@@ -38,9 +38,9 @@ class ScopeExtensionSpec extends Specification {
     FeatureInfo featureInfoMock = Mock() { getName() >> "I am a mocked feature" }
     SpecInfo specInfoMock = Mock() { getName() >> "MockedSpec" }
 
-    @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #skipped")
-    def "only tests in included scopes should be executed, while tests in excluded scopes should always be skipped in executions scoped via system parameters"(
-        Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes, Set<Class<? extends SpecScope>> specOrFeatureScopes, Skipped skipped) {
+    @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #excluded")
+    def "only tests in included scopes should be executed, while tests in excluded scopes should always be excluded in executions scoped via system parameters"(
+        Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes, Set<Class<? extends SpecScope>> specOrFeatureScopes, Excluded excluded) {
         given:
         setSystemParameters(includedScopes, excludedScopes)
 
@@ -52,26 +52,26 @@ class ScopeExtensionSpec extends Specification {
         scopeExtension.visitFeatureAnnotation(scopeMock, featureInfoMock)
 
         then:
-        (skipped ? 1 : 0) * specInfoMock.setSkipped(true)
-        (skipped ? 1 : 0) * featureInfoMock.setSkipped(true)
+        (excluded ? 1 : 0) * specInfoMock.setExcluded(true)
+        (excluded ? 1 : 0) * featureInfoMock.setExcluded(true)
 
         where:
-        includedScopes | excludedScopes | specOrFeatureScopes || skipped
-        []             | []             | []                  || NOT_SKIPPED // execution not scoped
-        [A]            | []             | [A]                 || NOT_SKIPPED // in scope
-        [A]            | []             | []                  || SKIPPED     // not in scope
-        [A]            | [A]            | [A]                 || SKIPPED     // excluded and included
-        [A]            | [A]            | []                  || SKIPPED     // empty scope, scoped execution
-        [A, B]         | [C, D]         | [A]                 || NOT_SKIPPED // in scope, multiple scopes
-        [A, B]         | [C, D]         | [C]                 || SKIPPED     // not in scope, multiple scopes
-        [A]            | []             | [A, C]              || NOT_SKIPPED // included, multiple test scopes
-        []             | [A]            | [A, C]              || SKIPPED     // excluded, multiple test scopes
-        []             | []             | []                  || NOT_SKIPPED // unscoped execution, no scope set
+        includedScopes | excludedScopes | specOrFeatureScopes || excluded
+        []             | []             | []                  || NOT_EXCLUDED // execution not scoped
+        [A]            | []             | [A]                 || NOT_EXCLUDED // in scope
+        [A]            | []             | []                  || EXCLUDED     // not in scope
+        [A]            | [A]            | [A]                 || EXCLUDED     // excluded and included
+        [A]            | [A]            | []                  || EXCLUDED     // empty scope, scoped execution
+        [A, B]         | [C, D]         | [A]                 || NOT_EXCLUDED // in scope, multiple scopes
+        [A, B]         | [C, D]         | [C]                 || EXCLUDED     // not in scope, multiple scopes
+        [A]            | []             | [A, C]              || NOT_EXCLUDED // included, multiple test scopes
+        []             | [A]            | [A, C]              || EXCLUDED     // excluded, multiple test scopes
+        []             | []             | []                  || NOT_EXCLUDED // unscoped execution, no scope set
     }
 
-    @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #skipped")
-    def "only tests in included scopes should be executed, while tests in excluded scopes should always be skipped in executions scoped via config parameters"(
-        Set<String> includedScopes, Set<String> excludedScopes, Set<String> specOrFeatureScopes, Skipped skipped) {
+    @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #excluded")
+    def "only tests in included scopes should be executed, while tests in excluded scopes should always be excluded in executions scoped via config parameters"(
+        Set<String> includedScopes, Set<String> excludedScopes, Set<String> specOrFeatureScopes, Excluded excluded) {
         given:
         setConfigParameters(includedScopes, excludedScopes)
 
@@ -83,27 +83,27 @@ class ScopeExtensionSpec extends Specification {
         scopeExtension.visitFeatureAnnotation(scopeMock, featureInfoMock)
 
         then:
-        (skipped ? 1 : 0) * specInfoMock.setSkipped(true)
-        (skipped ? 1 : 0) * featureInfoMock.setSkipped(true)
+        (excluded ? 1 : 0) * specInfoMock.setExcluded(true)
+        (excluded ? 1 : 0) * featureInfoMock.setExcluded(true)
 
         where:
-        includedScopes | excludedScopes | specOrFeatureScopes || skipped
-//        ["A"]          | []             | [A]                 || NOT_SKIPPED // in scope
-//        ["A"]          | []             | []                  || SKIPPED     // not in scope
-//        ["A"]          | ["A"]          | [A]                 || SKIPPED     // excluded and included
-//        ["A"]          | ["A"]          | []                  || SKIPPED     // empty scope, scoped execution
-//        ["A", "B"]     | ["C", "D"]     | [A]                 || NOT_SKIPPED // in scope, multiple scopes
-//        ["A", "B"]     | ["C", "D"]     | [C]                 || SKIPPED     // not in scope, multiple scopes
-//        ["A"]          | []             | [A, C]              || NOT_SKIPPED // included, multiple test scopes
-//        []             | ["A"]          | [A, C]              || SKIPPED     // excluded, multiple test scopes
-//        []             | []             | []                  || NOT_SKIPPED // unscoped execution, no scope set
-//        ["UNSCOPED"]   | []             | []                  || NOT_SKIPPED // unscoped included, unscoped spec
-        []             | ["UNSCOPED"]   | []                  || SKIPPED     // unscoped excluded, unscoped spec
+        includedScopes | excludedScopes | specOrFeatureScopes || excluded
+//        ["A"]          | []             | [A]                 || NOT_EXCLUDED // in scope
+//        ["A"]          | []             | []                  || EXCLUDED     // not in scope
+//        ["A"]          | ["A"]          | [A]                 || EXCLUDED     // excluded and included
+//        ["A"]          | ["A"]          | []                  || EXCLUDED     // empty scope, scoped execution
+//        ["A", "B"]     | ["C", "D"]     | [A]                 || NOT_EXCLUDED // in scope, multiple scopes
+//        ["A", "B"]     | ["C", "D"]     | [C]                 || EXCLUDED     // not in scope, multiple scopes
+//        ["A"]          | []             | [A, C]              || NOT_EXCLUDED // included, multiple test scopes
+//        []             | ["A"]          | [A, C]              || EXCLUDED     // excluded, multiple test scopes
+//        []             | []             | []                  || NOT_EXCLUDED // unscoped execution, no scope set
+//        ["UNSCOPED"]   | []             | []                  || NOT_EXCLUDED // unscoped included, unscoped spec
+        []             | ["UNSCOPED"]   | []                  || EXCLUDED     // unscoped excluded, unscoped spec
     }
 
-    @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, an unscoped Specification Or feature should be #skipped")
+    @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, an unscoped Specification Or feature should be #excluded")
     def "unscoped features should be ignored in executions scoped via system parameters"(
-        Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes, Skipped skipped) {
+        Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes, Excluded excluded) {
         given:
         setSystemParameters(includedScopes, excludedScopes)
 
@@ -116,19 +116,19 @@ class ScopeExtensionSpec extends Specification {
         scopeExtension.visitSpec(specInfoMock)
 
         then:
-        (skipped ? 1 : 0) * specInfoMock.setSkipped(true)
+        (excluded ? 1 : 0) * specInfoMock.setExcluded(true)
 
         where:
-        includedScopes | excludedScopes || skipped
-        []             | []             || NOT_SKIPPED // unscoped execution
-        [A]            | []             || SKIPPED     // scoped execution with included scopes
-        []             | [A]            || SKIPPED     // scoped execution with excluded scopes
-        [A]            | [B]            || SKIPPED     // scoped execution with included and excluded scopes
+        includedScopes | excludedScopes || excluded
+        []             | []             || NOT_EXCLUDED // unscoped execution
+        [A]            | []             || EXCLUDED     // scoped execution with included scopes
+        []             | [A]            || EXCLUDED     // scoped execution with excluded scopes
+        [A]            | [B]            || EXCLUDED     // scoped execution with included and excluded scopes
     }
 
-    @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, an unscoped Specification Or feature should be #skipped")
+    @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, an unscoped Specification Or feature should be #excluded")
     def "unscoped Specifications should be ignored in executions scoped via config"(
-        List<Class<? extends SpecScope>> includedScopes, List<Class<? extends SpecScope>> excludedScopes, Skipped skipped) {
+        List<Class<? extends SpecScope>> includedScopes, List<Class<? extends SpecScope>> excludedScopes, Excluded excluded) {
         given:
         setConfigParameters(includedScopes, excludedScopes)
 
@@ -141,16 +141,16 @@ class ScopeExtensionSpec extends Specification {
         scopeExtension.visitSpec(specInfoMock)
 
         then:
-        (skipped ? 1 : 0) * specInfoMock.setSkipped(true)
+        (excluded ? 1 : 0) * specInfoMock.setExcluded(true)
 
         where:
-        includedScopes | excludedScopes || skipped
-        []             | []             || NOT_SKIPPED // unscoped execution
-        ["A"]          | []             || SKIPPED     // scoped execution with included scopes
-        []             | ["A"]          || SKIPPED     // scoped execution with excluded scopes
-        ["A"]          | ["B"]          || SKIPPED     // scoped execution with included and excluded scopes
-        ["UNSCOPED"]   | []             || NOT_SKIPPED // unscoped included
-        []             | ["UNSCOPED"]   || SKIPPED     // unscoped excluded
+        includedScopes | excludedScopes || excluded
+        []             | []             || NOT_EXCLUDED // unscoped execution
+        ["A"]          | []             || EXCLUDED     // scoped execution with included scopes
+        []             | ["A"]          || EXCLUDED     // scoped execution with excluded scopes
+        ["A"]          | ["B"]          || EXCLUDED     // scoped execution with included and excluded scopes
+        ["UNSCOPED"]   | []             || NOT_EXCLUDED // unscoped included
+        []             | ["UNSCOPED"]   || EXCLUDED     // unscoped excluded
     }
 
     def "an unscoped Specification with scoped features should not be ignored"() {
@@ -167,9 +167,9 @@ class ScopeExtensionSpec extends Specification {
         scopeExtension.visitSpec(specInfoMock)
 
         then:
-        0 * specInfoMock.setSkipped(true)
-        1 * unscopedFeatureInfoMock.setSkipped(true)
-        0 * scopedFeatureInfoMock.setSkipped(true)
+        0 * specInfoMock.setExcluded(true)
+        1 * unscopedFeatureInfoMock.setExcluded(true)
+        0 * scopedFeatureInfoMock.setExcluded(true)
     }
 
     def "using something else, but Strings or SpecScope subclasses in config should cause an exception"(
