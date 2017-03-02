@@ -1,6 +1,7 @@
 package de.assertagile.spockframework.extensions
 
 import de.assertagile.spockframework.extensions.SpecScopes.A
+import de.assertagile.spockframework.extensions.SpecScopes.B
 import org.spockframework.runtime.model.SpecInfo
 import spock.lang.Specification
 
@@ -12,9 +13,9 @@ class SpockScopeConfigSpec extends Specification {
         ScopeExtension scopeExtension = new ScopeExtension()
 
         SpecInfo scopeASpecInfoMock = Mock() { getName() >> "MockedASpec" }
-        Scope scopeA = Mock() { value() >> [SpecScopes.A] }
+        Scope scopeA = Mock() { value() >> [A] }
         SpecInfo scopeBSpecInfoMock = Mock() { getName() >> "MockedBSpec" }
-        Scope scopeB = Mock() { value() >> [SpecScopes.B] }
+        Scope scopeB = Mock() { value() >> [B] }
 
         when:
         scopeExtension.visitSpecAnnotation(scopeA, scopeASpecInfoMock)
