@@ -6,11 +6,11 @@ class UnscopedSpec extends Specification {
 
     void "this generally important"() {
         expect:
-        false
+        true
     }
 
     void "this is generally important too"() {
         expect:
-        false
+        true
     }
 }

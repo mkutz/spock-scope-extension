@@ -12,13 +12,13 @@ class RequiresIgnoreIfRegressionSpec extends Specification {
     @Requires({ true })
     void "this is important for feature b and requires something"() {
         expect:
-        false
+        true
     }
 
     @Scope([SpecScopes.FeatureB])
     @IgnoreIf({ false })
     void "this is important for feature b c and will be ignored if something"() {
         expect:
-        false
+        true
     }
 }
