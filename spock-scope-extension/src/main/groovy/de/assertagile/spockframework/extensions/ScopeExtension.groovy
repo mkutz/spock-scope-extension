@@ -77,7 +77,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
     @Override
     void visitFixtureAnnotation(Scope annotation, MethodInfo fixtureMethod) {
         throw new InvalidSpecException("@%s may not be applied to fixture methods")
-            .withArgs(annotation.annotationType().getSimpleName());
+                .withArgs(annotation.annotationType().getSimpleName());
     }
 
     /**
@@ -91,7 +91,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
     @Override
     void visitFieldAnnotation(Scope annotation, FieldInfo field) {
         throw new InvalidSpecException("@%s may not be applied to fields")
-            .withArgs(annotation.annotationType().getSimpleName());
+                .withArgs(annotation.annotationType().getSimpleName());
     }
 
     /**
@@ -99,8 +99,11 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
      */
     @Override
     void start() {
-        if (isScopedExecution()) log.debug("This is a scoped execution")
-        else log.info("This is an unscoped execution, scopes will be ignored")
+        if (isScopedExecution()) {
+            log.debug("This is a scoped execution")
+        } else {
+            log.info("This is an unscoped execution, scopes will be ignored")
+        }
     }
 
     /**
@@ -138,13 +141,16 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
     private void visitExcludable(Scope annotation, IExcludable excludable, String name) {
         if (!isInIncludedScopes(annotation) || isInExcludedScopes(annotation)) {
             if (!isInIncludedScopes(annotation)) {
-                log.info("Excluding \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is not in included scope (${includedScopes})")
+                log.info("Excluding \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is not in " +
+                        "included scope (${includedScopes})")
             } else if (isInExcludedScopes(annotation)) {
-                log.info("Excluding \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is in excluded scope (${excludedScopes})")
+                log.info("Excluding \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is in " +
+                        "excluded scope (${excludedScopes})")
             }
             excludable.setExcluded(true)
         }
-        log.debug("Executing \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is in included scope (${includedScopes}) and not in excluded scope (${excludedScopes})")
+        log.debug("Including \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is in included scope " +
+                "(${includedScopes}) and not in excluded scope (${excludedScopes})")
     }
 
     private ConfigObject getConfig() {
@@ -175,31 +181,44 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
             scopes = System.getProperty(which.systemProperty)?.split(/\s*,\s*/)
         } else {
             scopes = (getConfig().get((which.configParameter) ?: [])).collect {
-                if (it instanceof Class<? extends SpecScope>) return it.simpleName
-                else if (it instanceof String) return it
-                else throw new IllegalArgumentException("Configured scopes must be either strings or subclasses of SpecScope! \"${it}\" is ${it.class.simpleName}.")
+                if (it instanceof Class<? extends SpecScope>) {
+                    return it.simpleName
+                } else if (it instanceof String) {
+                    return it
+                } else {
+                    throw new IllegalArgumentException("Configured scopes must be either strings or subclasses of " +
+                            "SpecScope! \"${it}\" is ${it.class.simpleName}.")
+                }
             }
         }
         return scopes
     }
 
     private boolean isInIncludedScopes(Scope annotation) {
-        if (!getIncludedScopes()) return true
-        List<Class<? extends SpecScope>> specOrFeatureScopes = (annotation?.value() ?: []) as List<Class<? extends SpecScope>>
-        if (!specOrFeatureScopes && isUnscopedIncluded()) return true
+        if (!getIncludedScopes()) {
+            return true
+        }
+        List<Class<? extends SpecScope>> specOrFeatureScopes = (annotation?.value() ?: []) as List
+        if (!specOrFeatureScopes && isUnscopedIncluded()) {
+            return true
+        }
         return !getIncludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }
 
     private boolean isInExcludedScopes(Scope annotation) {
-        if (!getExcludedScopes()) return false
-        List<Class<? extends SpecScope>> specOrFeatureScopes = (annotation?.value() ?: []) as List<Class<? extends SpecScope>>
-        if (!specOrFeatureScopes && !isUnscopedIncluded()) return true
+        if (!getExcludedScopes()) {
+            return false
+        }
+        List<Class<? extends SpecScope>> specOrFeatureScopes = (annotation?.value() ?: []) as List
+        if (!specOrFeatureScopes && !isUnscopedIncluded()) {
+            return true
+        }
         return !getExcludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }
 
     private boolean isUnscopedIncluded() {
         getIncludedScopes().contains(PseudoScope.UNSCOPED.parameterValue) &&
-            !getExcludedScopes().contains(PseudoScope.UNSCOPED.parameterValue)
+                !getExcludedScopes().contains(PseudoScope.UNSCOPED.parameterValue)
     }
 
     private boolean isScopedExecution() {
@@ -207,6 +226,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
     }
 
     private enum Parameter {
+
         INCLUDED("spock.scopes", "includedScopes"),
         EXCLUDED("spock.excludedScopes", "excludedScopes")
 
@@ -220,6 +240,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
     }
 
     private enum PseudoScope {
+
         UNSCOPED("UNSCOPED")
 
         final String parameterValue
