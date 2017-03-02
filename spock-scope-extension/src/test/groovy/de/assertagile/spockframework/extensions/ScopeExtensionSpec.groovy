@@ -13,8 +13,8 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Unroll
 
-import static de.assertagile.spockframework.extensions.ScopeExtensionSpec.Excluded.NOT_EXCLUDED
 import static de.assertagile.spockframework.extensions.ScopeExtensionSpec.Excluded.EXCLUDED
+import static de.assertagile.spockframework.extensions.ScopeExtensionSpec.Excluded.NOT_EXCLUDED
 
 @Scope(A)
 class ScopeExtensionSpec extends Specification {
@@ -88,16 +88,16 @@ class ScopeExtensionSpec extends Specification {
 
         where:
         includedScopes | excludedScopes | specOrFeatureScopes || excluded
-//        ["A"]          | []             | [A]                 || NOT_EXCLUDED // in scope
-//        ["A"]          | []             | []                  || EXCLUDED     // not in scope
-//        ["A"]          | ["A"]          | [A]                 || EXCLUDED     // excluded and included
-//        ["A"]          | ["A"]          | []                  || EXCLUDED     // empty scope, scoped execution
-//        ["A", "B"]     | ["C", "D"]     | [A]                 || NOT_EXCLUDED // in scope, multiple scopes
-//        ["A", "B"]     | ["C", "D"]     | [C]                 || EXCLUDED     // not in scope, multiple scopes
-//        ["A"]          | []             | [A, C]              || NOT_EXCLUDED // included, multiple test scopes
-//        []             | ["A"]          | [A, C]              || EXCLUDED     // excluded, multiple test scopes
-//        []             | []             | []                  || NOT_EXCLUDED // unscoped execution, no scope set
-//        ["UNSCOPED"]   | []             | []                  || NOT_EXCLUDED // unscoped included, unscoped spec
+        ["A"]          | []             | [A]                 || NOT_EXCLUDED // in scope
+        ["A"]          | []             | []                  || EXCLUDED     // not in scope
+        ["A"]          | ["A"]          | [A]                 || EXCLUDED     // excluded and included
+        ["A"]          | ["A"]          | []                  || EXCLUDED     // empty scope, scoped execution
+        ["A", "B"]     | ["C", "D"]     | [A]                 || NOT_EXCLUDED // in scope, multiple scopes
+        ["A", "B"]     | ["C", "D"]     | [C]                 || EXCLUDED     // not in scope, multiple scopes
+        ["A"]          | []             | [A, C]              || NOT_EXCLUDED // included, multiple test scopes
+        []             | ["A"]          | [A, C]              || EXCLUDED     // excluded, multiple test scopes
+        []             | []             | []                  || NOT_EXCLUDED // unscoped execution, no scope set
+        ["UNSCOPED"]   | []             | []                  || NOT_EXCLUDED // unscoped included, unscoped spec
         []             | ["UNSCOPED"]   | []                  || EXCLUDED     // unscoped excluded, unscoped spec
     }
 
