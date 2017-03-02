@@ -38,7 +38,7 @@ class ScopeExtensionSpec extends Specification {
     FeatureInfo featureInfoMock = Mock() { getName() >> "I am a mocked feature" }
     SpecInfo specInfoMock = Mock() { getName() >> "MockedSpec" }
 
-    @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #excluded")
+    @Unroll("with -Dspock.scopes #includedScopes.simpleName and -Dspock.excludedScopes #excludedScopes.simpleName, a feature or spec with scopes #specOrFeatureScopes.simpleName should be #excluded")
     void "only tests in included scopes should be executed, while tests in excluded scopes should always be excluded in executions scoped via system parameters"(
         Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes, Set<Class<? extends SpecScope>> specOrFeatureScopes, Excluded excluded) {
         given:
@@ -66,7 +66,10 @@ class ScopeExtensionSpec extends Specification {
         [A, B]         | [C, D]         | [C]                 || EXCLUDED     // not in scope, multiple scopes
         [A]            | []             | [A, C]              || NOT_EXCLUDED // included, multiple test scopes
         []             | [A]            | [A, C]              || EXCLUDED     // excluded, multiple test scopes
+        []             | [A]            | [B]                 || NOT_EXCLUDED // included, because not in excluded
         []             | []             | []                  || NOT_EXCLUDED // unscoped execution, no scope set
+        ["UNSCOPED"]   | [A]            | []                  || NOT_EXCLUDED // unscoped includes, unscoped spec
+        ["UNSCOPED"]   | [A]            | [A]                 || EXCLUDED     // unscoped includes, in excluded scope
     }
 
     @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #excluded")
@@ -96,9 +99,12 @@ class ScopeExtensionSpec extends Specification {
         ["A", "B"]     | ["C", "D"]     | [C]                 || EXCLUDED     // not in scope, multiple scopes
         ["A"]          | []             | [A, C]              || NOT_EXCLUDED // included, multiple test scopes
         []             | ["A"]          | [A, C]              || EXCLUDED     // excluded, multiple test scopes
+        []             | ["A"]          | [B]                 || NOT_EXCLUDED // included, because not in excluded
         []             | []             | []                  || NOT_EXCLUDED // unscoped execution, no scope set
         ["UNSCOPED"]   | []             | []                  || NOT_EXCLUDED // unscoped included, unscoped spec
         []             | ["UNSCOPED"]   | []                  || EXCLUDED     // unscoped excluded, unscoped spec
+        ["UNSCOPED"]   | ["A"]          | []                  || NOT_EXCLUDED // unscoped includes, unscoped spec
+        ["UNSCOPED"]   | ["A"]          | [A]                 || EXCLUDED     // unscoped includes, in excluded scope
     }
 
     @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, an unscoped Specification Or feature should be #excluded")
@@ -212,10 +218,11 @@ class ScopeExtensionSpec extends Specification {
         resetSystemParameters()
     }
 
-    private static void setSystemParameters(Set<Class<? extends SpecScope>> includedScopes,
-            Set<Class<? extends SpecScope>> excludedScopes) {
-        System.setProperty("spock.scopes", includedScopes*.simpleName.join(","))
-        System.setProperty("spock.excludedScopes", excludedScopes*.simpleName.join(","))
+    private static void setSystemParameters(final Set includedScopes, final Set excludedScopes) {
+        final List includedScopeStrings = includedScopes.collect { it instanceof Class ? it.simpleName : it }
+        final List excludedScopeStrings = excludedScopes.collect { it instanceof Class ? it.simpleName : it }
+        System.setProperty("spock.scopes", includedScopeStrings.join(","))
+        System.setProperty("spock.excludedScopes", excludedScopeStrings.join(","))
     }
 
     private void resetSystemParameters() {
