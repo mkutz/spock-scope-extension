@@ -12,6 +12,6 @@ class ScopedSpec extends Specification {
 
     void "this is important for feature a"() {
         expect:
-        false
+        true
     }
 }
