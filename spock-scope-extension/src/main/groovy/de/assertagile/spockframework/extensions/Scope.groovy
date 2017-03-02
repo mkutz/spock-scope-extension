@@ -19,7 +19,7 @@ import java.lang.annotation.Target
 @Retention(RetentionPolicy.RUNTIME)
 @Target([ElementType.TYPE, ElementType.METHOD])
 @ExtensionAnnotation(ScopeExtension)
-public @interface Scope {
+@interface Scope {
 
     /**
      * @return a scope or a set of scopes identified as subclasses of {@link SpecScope}.

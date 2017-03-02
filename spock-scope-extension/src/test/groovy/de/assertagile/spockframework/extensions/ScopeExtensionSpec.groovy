@@ -27,9 +27,9 @@ class ScopeExtensionSpec extends Specification {
     enum Excluded {
         EXCLUDED, NOT_EXCLUDED
 
-        public boolean asBoolean() { this == EXCLUDED }
+        boolean asBoolean() { this == EXCLUDED }
 
-        public String toString() { super.toString().toLowerCase().replace("_", " ") }
+        String toString() { super.toString().toLowerCase().replace("_", " ") }
     }
 
     @Subject
@@ -39,7 +39,7 @@ class ScopeExtensionSpec extends Specification {
     SpecInfo specInfoMock = Mock() { getName() >> "MockedSpec" }
 
     @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #excluded")
-    def "only tests in included scopes should be executed, while tests in excluded scopes should always be excluded in executions scoped via system parameters"(
+    void "only tests in included scopes should be executed, while tests in excluded scopes should always be excluded in executions scoped via system parameters"(
         Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes, Set<Class<? extends SpecScope>> specOrFeatureScopes, Excluded excluded) {
         given:
         setSystemParameters(includedScopes, excludedScopes)
@@ -70,7 +70,7 @@ class ScopeExtensionSpec extends Specification {
     }
 
     @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, a feature or spec with scopes #specOrFeatureScopes should be #excluded")
-    def "only tests in included scopes should be executed, while tests in excluded scopes should always be excluded in executions scoped via config parameters"(
+    void "only tests in included scopes should be executed, while tests in excluded scopes should always be excluded in executions scoped via config parameters"(
         Set<String> includedScopes, Set<String> excludedScopes, Set<String> specOrFeatureScopes, Excluded excluded) {
         given:
         setConfigParameters(includedScopes, excludedScopes)
@@ -102,7 +102,7 @@ class ScopeExtensionSpec extends Specification {
     }
 
     @Unroll("with -Dspock.scopes #includedScopes and -Dspock.excludedScopes #excludedScopes, an unscoped Specification Or feature should be #excluded")
-    def "unscoped features should be ignored in executions scoped via system parameters"(
+    void "unscoped features should be ignored in executions scoped via system parameters"(
         Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes, Excluded excluded) {
         given:
         setSystemParameters(includedScopes, excludedScopes)
@@ -127,7 +127,7 @@ class ScopeExtensionSpec extends Specification {
     }
 
     @Unroll("with includedScopes = #includedScopes and excludedScopes = #excludedScopes, an unscoped Specification Or feature should be #excluded")
-    def "unscoped Specifications should be ignored in executions scoped via config"(
+    void "unscoped Specifications should be ignored in executions scoped via config"(
         List<Class<? extends SpecScope>> includedScopes, List<Class<? extends SpecScope>> excludedScopes, Excluded excluded) {
         given:
         setConfigParameters(includedScopes, excludedScopes)
@@ -153,7 +153,7 @@ class ScopeExtensionSpec extends Specification {
         []             | ["UNSCOPED"]   || EXCLUDED     // unscoped excluded
     }
 
-    def "an unscoped Specification with scoped features should not be ignored"() {
+    void "an unscoped Specification with scoped features should not be ignored"() {
         given:
         setConfigParameters([A], [B])
 
@@ -172,7 +172,7 @@ class ScopeExtensionSpec extends Specification {
         0 * scopedFeatureInfoMock.setExcluded(true)
     }
 
-    def "using something else, but Strings or SpecScope subclasses in config should cause an exception"(
+    void "using something else, but Strings or SpecScope subclasses in config should cause an exception"(
         List<Object> includedScopes, List<Object> excludedScopes) {
         given:
         setConfigParameters(includedScopes, excludedScopes)
@@ -190,7 +190,7 @@ class ScopeExtensionSpec extends Specification {
         []             | [new Object()]
     }
 
-    def "scoping a fixture method will throw an exception"() {
+    void "scoping a fixture method will throw an exception"() {
         when:
         scopeExtension.visitFixtureAnnotation(Mock(Scope) { annotationType() >> Scope }, Mock(MethodInfo))
 
@@ -199,7 +199,7 @@ class ScopeExtensionSpec extends Specification {
         e.message == "@Scope may not be applied to fixture methods"
     }
 
-    def "scoping a field throw will an exception"() {
+    void "scoping a field throw will an exception"() {
         when:
         scopeExtension.visitFieldAnnotation(Mock(Scope) { annotationType() >> Scope }, Mock(FieldInfo))
 
@@ -208,11 +208,12 @@ class ScopeExtensionSpec extends Specification {
         e.message == "@Scope may not be applied to fields"
     }
 
-    def cleanup() {
+    void cleanup() {
         resetSystemParameters()
     }
 
-    private void setSystemParameters(Set<Class<? extends SpecScope>> includedScopes, Set<Class<? extends SpecScope>> excludedScopes) {
+    private static void setSystemParameters(Set<Class<? extends SpecScope>> includedScopes,
+            Set<Class<? extends SpecScope>> excludedScopes) {
         System.setProperty("spock.scopes", includedScopes*.simpleName.join(","))
         System.setProperty("spock.excludedScopes", excludedScopes*.simpleName.join(","))
     }
@@ -222,7 +223,7 @@ class ScopeExtensionSpec extends Specification {
         System.setProperty("spock.excludedScopes", originalExcludedScopes)
     }
 
-    private void setConfigParameters(def includedScopes, def excludedScopes) {
+    private void setConfigParameters(includedScopes, excludedScopes) {
         configMock.get("includedScopes") >> includedScopes
         configMock.get("excludedScopes") >> excludedScopes
     }

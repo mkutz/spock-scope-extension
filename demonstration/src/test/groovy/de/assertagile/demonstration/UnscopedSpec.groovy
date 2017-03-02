@@ -4,12 +4,12 @@ import spock.lang.Specification
 
 class UnscopedSpec extends Specification {
 
-    def "this generally important"() {
+    void "this generally important"() {
         expect:
         false
     }
 
-    def "this is generally important too"() {
+    void "this is generally important too"() {
         expect:
         false
     }

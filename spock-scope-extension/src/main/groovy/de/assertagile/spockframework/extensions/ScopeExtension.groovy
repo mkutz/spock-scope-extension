@@ -22,7 +22,7 @@ import org.spockframework.runtime.model.SpecInfo
  * </p>
  */
 @Slf4j
-public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtension {
+class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtension {
 
     /** {@link ConfigObject} for the extension. */
     private ConfigObject config
@@ -36,7 +36,7 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
     /**
      * Standard constructor.
      */
-    public ScopeExtension() {}
+    ScopeExtension() {}
 
     /**
      * Called when a marked specification type is visited. Sets the whole {@link SpecInfo} to be ignored if not in one
@@ -48,7 +48,7 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
      *          the {@link SpecInfo} for the visited specification class.
      */
     @Override
-    public void visitSpecAnnotation(Scope annotation, SpecInfo spec) {
+    void visitSpecAnnotation(Scope annotation, SpecInfo spec) {
         visitExcludable(annotation, spec, spec.name)
     }
 
@@ -62,7 +62,7 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
      *          the {@link FeatureInfo} for the visited feature method.
      */
     @Override
-    public void visitFeatureAnnotation(Scope annotation, FeatureInfo feature) {
+    void visitFeatureAnnotation(Scope annotation, FeatureInfo feature) {
         visitExcludable(annotation, feature, feature.name)
     }
 
@@ -75,7 +75,7 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
      *          the {@link MethodInfo} for the visited fixture method.
      */
     @Override
-    public void visitFixtureAnnotation(Scope annotation, MethodInfo fixtureMethod) {
+    void visitFixtureAnnotation(Scope annotation, MethodInfo fixtureMethod) {
         throw new InvalidSpecException("@%s may not be applied to fixture methods")
             .withArgs(annotation.annotationType().getSimpleName());
     }
@@ -89,7 +89,7 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
      *          the {@link FieldInfo} for the visited field.
      */
     @Override
-    public void visitFieldAnnotation(Scope annotation, FieldInfo field) {
+    void visitFieldAnnotation(Scope annotation, FieldInfo field) {
         throw new InvalidSpecException("@%s may not be applied to fields")
             .withArgs(annotation.annotationType().getSimpleName());
     }
@@ -112,7 +112,7 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
      *          the visited {@link SpecInfo}.
      */
     @Override
-    public void visitSpec(SpecInfo spec) {
+    void visitSpec(SpecInfo spec) {
         log.debug("Visiting ${spec.name}")
         if (!isUnscopedIncluded() && isScopedExecution() && !spec.getAnnotation(Scope)) {
             List<FeatureInfo> unscopedFeatures = spec.allFeatures.findAll { !it.featureMethod.getAnnotation(Scope) }
@@ -185,14 +185,16 @@ public class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGloba
 
     private boolean isInIncludedScopes(Scope annotation) {
         if (!getIncludedScopes()) return true
-        List<Class<? extends SpecScope>> specOrFeatureScopes = annotation?.value() ?: []
+        List<Class<? extends SpecScope>> specOrFeatureScopes = (annotation?.value() ?: []) as
+                List<Class<? extends SpecScope>>
         if (!specOrFeatureScopes && isUnscopedIncluded()) return true
         return !getIncludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }
 
     private boolean isInExcludedScopes(Scope annotation) {
         if (!getExcludedScopes()) return false
-        List<Class<? extends SpecScope>> specOrFeatureScopes = annotation?.value() ?: []
+        List<Class<? extends SpecScope>> specOrFeatureScopes = (annotation?.value() ?: []) as
+                List<Class<? extends SpecScope>>
         if (!specOrFeatureScopes && !isUnscopedIncluded()) return true
         return !getExcludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }

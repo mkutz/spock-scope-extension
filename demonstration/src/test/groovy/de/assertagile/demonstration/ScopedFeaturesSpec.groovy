@@ -6,18 +6,18 @@ import spock.lang.Specification
 class ScopedFeaturesSpec extends Specification {
 
     @Scope(SpecScopes.FeatureA)
-    def "this is important for feature a"() {
+    void "this is important for feature a"() {
         expect:
         true
     }
 
     @Scope([SpecScopes.FeatureB, SpecScopes.FeatureC])
-    def "this is important for feature b and c"() {
+    void "this is important for feature b and c"() {
         expect:
         true
     }
 
-    def "this is not important for a particular"() {
+    void "this is not important for a particular"() {
         expect:
         true
     }

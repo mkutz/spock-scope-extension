@@ -8,7 +8,7 @@ import spock.lang.Specification
 @Scope(A)
 class SpockScopeConfigSpec extends Specification {
 
-    def "config should be read from SpockScopeConfig.groovy if not mocked"() {
+    void "config should be read from SpockScopeConfig.groovy if not mocked"() {
         given:
         ScopeExtension scopeExtension = new ScopeExtension()
 
