@@ -163,14 +163,14 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
 
     private Set<String> getIncludedScopes() {
         if (includedScopes == null) {
-            includedScopes = getScopes(Parameter.INCLUDED)
+            includedScopes = getScopes(Parameter.INCLUDED)*.toLowerCase()
         }
         return includedScopes
     }
 
     private Set<String> getExcludedScopes() {
         if (excludedScopes == null) {
-            excludedScopes = getScopes(Parameter.EXCLUDED)
+            excludedScopes = getScopes(Parameter.EXCLUDED)*.toLowerCase()
         }
         return excludedScopes
     }
@@ -202,7 +202,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
         if (!specOrFeatureScopes && isUnscopedIncluded()) {
             return true
         }
-        return !getIncludedScopes().disjoint(specOrFeatureScopes*.simpleName)
+        return !getIncludedScopes().disjoint(specOrFeatureScopes*.simpleName*.toLowerCase())
     }
 
     private boolean isInExcludedScopes(Scope annotation) {
@@ -213,12 +213,12 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
         if (!specOrFeatureScopes && !isUnscopedIncluded()) {
             return true
         }
-        return !getExcludedScopes().disjoint(specOrFeatureScopes*.simpleName)
+        return !getExcludedScopes().disjoint(specOrFeatureScopes*.simpleName*.toLowerCase())
     }
 
     private boolean isUnscopedIncluded() {
-        getIncludedScopes().contains(PseudoScope.UNSCOPED.parameterValue) &&
-                !getExcludedScopes().contains(PseudoScope.UNSCOPED.parameterValue)
+        getIncludedScopes().contains(PseudoScopes.Unscoped.simpleName.toLowerCase()) &&
+                !getExcludedScopes().contains(PseudoScopes.Unscoped.simpleName.toLowerCase())
     }
 
     private boolean isScopedExecution() {
@@ -236,17 +236,6 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
         private Parameter(String systemProperty, String configParameter) {
             this.configParameter = configParameter
             this.systemProperty = systemProperty
-        }
-    }
-
-    private enum PseudoScope {
-
-        UNSCOPED("UNSCOPED")
-
-        final String parameterValue
-
-        private PseudoScope(String parameterValue) {
-            this.parameterValue = parameterValue
         }
     }
 }

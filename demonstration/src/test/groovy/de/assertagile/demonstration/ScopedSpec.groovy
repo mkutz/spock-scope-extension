@@ -1,4 +1,5 @@
 package de.assertagile.demonstration
+
 import de.assertagile.spockframework.extensions.Scope
 import spock.lang.Specification
 
