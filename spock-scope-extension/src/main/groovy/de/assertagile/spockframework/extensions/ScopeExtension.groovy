@@ -48,7 +48,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
      *          the {@link SpecInfo} for the visited specification class.
      */
     @Override
-    void visitSpecAnnotation(Scope annotation, SpecInfo spec) {
+    void visitSpecAnnotation(final Scope annotation, final SpecInfo spec) {
         visitExcludable(annotation, spec, spec.name)
     }
 
@@ -62,7 +62,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
      *          the {@link FeatureInfo} for the visited feature method.
      */
     @Override
-    void visitFeatureAnnotation(Scope annotation, FeatureInfo feature) {
+    void visitFeatureAnnotation(final Scope annotation, final FeatureInfo feature) {
         visitExcludable(annotation, feature, feature.name)
     }
 
@@ -75,7 +75,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
      *          the {@link MethodInfo} for the visited fixture method.
      */
     @Override
-    void visitFixtureAnnotation(Scope annotation, MethodInfo fixtureMethod) {
+    void visitFixtureAnnotation(final Scope annotation, final MethodInfo fixtureMethod) {
         throw new InvalidSpecException("@%s may not be applied to fixture methods")
                 .withArgs(annotation.annotationType().getSimpleName());
     }
@@ -89,7 +89,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
      *          the {@link FieldInfo} for the visited field.
      */
     @Override
-    void visitFieldAnnotation(Scope annotation, FieldInfo field) {
+    void visitFieldAnnotation(final Scope annotation, final FieldInfo field) {
         throw new InvalidSpecException("@%s may not be applied to fields")
                 .withArgs(annotation.annotationType().getSimpleName());
     }
@@ -115,7 +115,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
      *          the visited {@link SpecInfo}.
      */
     @Override
-    void visitSpec(SpecInfo spec) {
+    void visitSpec(final SpecInfo spec) {
         log.debug("Visiting ${spec.name}")
         if (!isUnscopedIncluded() && isScopedExecution() && !spec.getAnnotation(Scope)) {
             List<FeatureInfo> unscopedFeatures = spec.allFeatures.findAll { !it.featureMethod.getAnnotation(Scope) }
@@ -138,7 +138,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
     void stop() {
     }
 
-    private void visitExcludable(Scope annotation, IExcludable excludable, String name) {
+    private void visitExcludable(final Scope annotation, final IExcludable excludable, final String name) {
         if (!isInIncludedScopes(annotation) || isInExcludedScopes(annotation)) {
             if (!isInIncludedScopes(annotation)) {
                 log.info("Excluding \"${name}\" for its scope ${annotation?.value()*.simpleName ?: []} is not in " +
@@ -175,7 +175,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
         return excludedScopes
     }
 
-    private Set<String> getScopes(Parameter which) {
+    private Set<String> getScopes(final Parameter which) {
         Set<String> scopes
         if (System.getProperty(which.systemProperty)) {
             scopes = System.getProperty(which.systemProperty)?.split(/\s*,\s*/)
@@ -194,7 +194,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
         return scopes
     }
 
-    private boolean isInIncludedScopes(Scope annotation) {
+    private boolean isInIncludedScopes(final Scope annotation) {
         if (!getIncludedScopes()) {
             return true
         }
@@ -205,7 +205,7 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
         return !getIncludedScopes().disjoint(specOrFeatureScopes*.simpleName*.toLowerCase())
     }
 
-    private boolean isInExcludedScopes(Scope annotation) {
+    private boolean isInExcludedScopes(final Scope annotation) {
         if (!getExcludedScopes()) {
             return false
         }
