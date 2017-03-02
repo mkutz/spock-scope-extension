@@ -185,16 +185,14 @@ class ScopeExtension implements IAnnotationDrivenExtension<Scope>, IGlobalExtens
 
     private boolean isInIncludedScopes(Scope annotation) {
         if (!getIncludedScopes()) return true
-        List<Class<? extends SpecScope>> specOrFeatureScopes = (annotation?.value() ?: []) as
-                List<Class<? extends SpecScope>>
+        List<Class<? extends SpecScope>> specOrFeatureScopes = (annotation?.value() ?: []) as List<Class<? extends SpecScope>>
         if (!specOrFeatureScopes && isUnscopedIncluded()) return true
         return !getIncludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }
 
     private boolean isInExcludedScopes(Scope annotation) {
         if (!getExcludedScopes()) return false
-        List<Class<? extends SpecScope>> specOrFeatureScopes = (annotation?.value() ?: []) as
-                List<Class<? extends SpecScope>>
+        List<Class<? extends SpecScope>> specOrFeatureScopes = (annotation?.value() ?: []) as List<Class<? extends SpecScope>>
         if (!specOrFeatureScopes && !isUnscopedIncluded()) return true
         return !getExcludedScopes().disjoint(specOrFeatureScopes*.simpleName)
     }
