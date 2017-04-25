@@ -41,3 +41,12 @@ excludedScopes = [FeatureB]
 Note that if neither `includedScopes` nor `excludedScopes` is configured and neither `-Dspock.scopes=…` nor `-Dspock.excludedScopes=…` are set the extension will not ignore any test.
 
 Also note that the `-Dspock.scopes=…` and `-Dspock.excludedScopes=…` parameters will always replace the configuration in `SpockScopeConfig.groovy` if given.
+
+Alternative
+-----------
+
+Instead of using this custom extension, you could also use Spock's own (undocumented) runner configuration mechanism.
+
+Check the source in this [demonstration folder](https://github.com/mkutz/spock-scope-extension/tree/master/demonstration-no-extension) for some examples how to use it.
+
+This was derived from [the IncludeExcludeExtensionSpec](https://github.com/spockframework/spock-example/blob/master/src/test/groovy/IncludeExcludeExtensionSpec.groovy) in the [spock-example project](https://github.com/spockframework/spock-example). Checkout the GroovyDoc on the file for more details.
