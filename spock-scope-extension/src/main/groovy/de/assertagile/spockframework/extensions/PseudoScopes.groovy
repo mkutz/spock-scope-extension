@@ -1,8 +1,8 @@
 package de.assertagile.spockframework.extensions
 
-class PseudoScopes {
+interface PseudoScopes {
 
-    class Unscoped implements SpecScope {}
+    interface Unscoped extends SpecScope {}
 
-    class AllBut implements SpecScope {}
+    interface AllBut extends SpecScope {}
 }
