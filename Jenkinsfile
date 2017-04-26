@@ -18,7 +18,7 @@ pipeline {
         stage("Collect Results") {
             steps {
                 junit "**/target/surefire-reports/TEST-*.xml"
-                archive "target/*.jar"
+                archive "spock-scope-extension/target/*.jar"
             }
         }
 
