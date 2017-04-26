@@ -3,16 +3,14 @@
 pipeline {
     agent any
     stages {
-        stage('Build') {
+        stage("Build") {
             steps {
-                sh "cd spock-scope-extension"
-                sh "mvn package"
+                sh "cd spock-scope-extension && ${tool "M3"}/bin/mvn package"
             }
         }
-    }
-    post {
-        always {
-            junit "**/target/TEST-*.xml"
+        stage("Collect Results") {
+            junit "**/target/surefire-reports/TEST-*.xml"
+            archive "target/*.jar"
         }
     }
 }
