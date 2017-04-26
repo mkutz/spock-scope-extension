@@ -9,8 +9,10 @@ pipeline {
             }
         }
         stage("Collect Results") {
-            junit "**/target/surefire-reports/TEST-*.xml"
-            archive "target/*.jar"
+            steps {
+                junit "**/target/surefire-reports/TEST-*.xml"
+                archive "target/*.jar"
+            }
         }
     }
 }
