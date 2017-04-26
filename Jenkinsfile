@@ -5,7 +5,7 @@ pipeline {
     stages {
         stage("Build") {
             steps {
-                sh "cd spock-scope-extension && ${tool "M3"}/bin/mvn package"
+                sh "cd spock-scope-extension && ${tool "Maven"}/bin/mvn package"
             }
         }
         stage("Collect Results") {
