@@ -8,7 +8,6 @@ pipeline {
     }
 
     stages {
-
         stage("Build") {
             steps {
                 ansiColor("vga") {
@@ -16,13 +15,14 @@ pipeline {
                 }
             }
         }
-
-        stage("Collect Results") {
-            steps {
-                junit "**/target/surefire-reports/TEST-*.xml"
-                archive "spock-scope-extension/target/*.jar"
-            }
+    }
+    
+    post {
+        always {
+            junit "**/target/surefire-reports/TEST-*.xml"
         }
-
+        success {
+            archive "spock-scope-extension/target/*.jar"
+        }
     }
 }
