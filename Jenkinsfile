@@ -3,6 +3,10 @@
 pipeline {
     agent any
 
+    options {
+        buildDiscarder(logRotator(numToKeep: 5))
+    }
+
     tools {
         maven "Maven"
     }
