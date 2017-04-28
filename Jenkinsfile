@@ -11,9 +11,7 @@ pipeline {
 
         stage("Build") {
             steps {
-                ansiColor('xterm') {
-                    sh "cd spock-scope-extension && mvn package"
-                }
+                sh "cd spock-scope-extension && mvn package"
             }
         }
 
