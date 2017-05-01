@@ -29,7 +29,8 @@ pipeline {
             archive "spock-scope-extension/target/*.jar"
 
             hipchatSend color: "GREEN", notify: true, room: "Team Fraggles",
-                message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})"
+                message: "SUCCESSFUL: Job '${env.JOB_NAME} #${env.BUILD_NUMBER}' (${BLUE_OCEAN_URL})" +
+                        "${HIPCHAT_CHANGES}"
         }
     }
 }
